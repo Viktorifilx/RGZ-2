@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}🎪 Ярмарка мастеров{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo">
+            🎪 <span>FairMarket</span>
+        </div>
+        <nav class="main-nav">
+            <a href="{{ url_for('index') }}">Главная</a>
+            <a href="#">Улицы</a>
+            <a href="#">О ярмарке</a>
+        </nav>
+        <div class="auth-block">
+            <button class="btn btn-outline">Войти</button>
+            <button class="btn btn-primary">Регистрация</button>
+        </div>
+    </header>
+
+    <main class="page-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span>Разработчик: {{ fio }}</span>
+            <span>Группа: {{ group }}</span>
+            <span>Проект: "Цифровая ярмарка мастеров"</span>
+        </div>
+    </footer>
+
+    <script>
+        // Простая анимация для палаток при скролле
+        document.addEventListener('DOMContentLoaded', function() {
+            const tents = document.querySelectorAll('.tent');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            tents.forEach(tent => {
+                observer.observe(tent);
+            });
+        });
+    </script>
+</body>
+</html>

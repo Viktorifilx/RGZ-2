@@ -1,0 +1,1818 @@
+/* ================== RESET ================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* ================== BASE ================== */
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #ffe6f3 0, #fff5d9 30%, #f3f4ff 70%, #e0f7ff 100%);
+    color: #222;
+}
+
+/* ================== HEADER ================== */
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 40px;
+    backdrop-filter: blur(14px);
+    background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.75));
+    border-bottom: 1px solid rgba(255,255,255,0.8);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.logo span {
+    letter-spacing: 0.03em;
+}
+
+.main-nav {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: #444;
+    position: relative;
+}
+
+.main-nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #f97316, #ec4899, #8b5cf6);
+    transition: width .2s ease-out;
+}
+
+.main-nav a:hover::after {
+    width: 100%;
+}
+
+.auth-block {
+    display: flex;
+    gap: 8px;
+}
+
+/* ================== BUTTONS ================== */
+
+.btn {
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition:
+        transform .12s ease-out,
+        box-shadow .12s ease-out,
+        background .12s ease-out,
+        color .12s ease-out;
+    white-space: nowrap;
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 12px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(236, 72, 153, 0.35);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(236, 72, 153, 0.45);
+}
+
+.btn-outline {
+    background: rgba(255,255,255,0.9);
+    color: #444;
+    border-color: rgba(148,163,184,0.7);
+}
+
+.btn-outline:hover {
+    background: #f1f5f9;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: #444;
+    border-color: rgba(148,163,184,0.4);
+}
+
+.btn-ghost:hover {
+    background: rgba(255,255,255,0.7);
+}
+
+/* ================== LAYOUT ================== */
+
+.page-content {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+}
+
+/* ================== HERO (главная) ================== */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.hero-text h1 {
+    font-size: 38px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+}
+
+.hero-text p {
+    max-width: 520px;
+    font-size: 15px;
+    color: #4b5563;
+    margin-bottom: 18px;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Иллюстрация — большая палатка */
+
+.hero-illustration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.big-tent {
+    position: relative;
+    width: 220px;
+    height: 180px;
+}
+
+.big-tent .tent-top {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 200px;
+    height: 80px;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f97316, #facc15, #22c55e);
+    clip-path: polygon(0 100%, 15% 0, 50% 20%, 85% 0, 100% 100%);
+    box-shadow: 0 12px 24px rgba(248, 113, 113, 0.3);
+}
+
+.big-tent .tent-body {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 210px;
+    height: 120px;
+    background: linear-gradient(to bottom, #fff7ed, #fee2e2);
+    border-radius: 18px;
+    box-shadow: 0 16px 34px rgba(148, 163, 184, 0.45);
+}
+
+.big-tent .tent-flag {
+    position: absolute;
+    left: 50%;
+    top: -32px;
+    width: 0;
+    height: 0;
+    border-left: 0;
+    border-right: 18px solid transparent;
+    border-bottom: 28px solid #ef4444;
+    transform: translateX(-50%);
+}
+
+.hero-note {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Общая анимация палаток (используется скриптом через класс .tent) */
+
+.tent {
+    animation: tent-float 4s ease-in-out infinite;
+    animation-play-state: paused; /* оживляем через IntersectionObserver */
+}
+
+@keyframes tent-float {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-6px); }
+    100% { transform: translateY(0); }
+}
+
+/* ================== FAIRGROUND (главная — улицы) ================== */
+
+.fairground h2 {
+    font-size: 26px;
+    margin-bottom: 4px;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.streets-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 8px;
+}
+
+/* ------- Улицы на главной ------- */
+
+.street {
+    border-radius: 20px;
+    padding: 18px 18px 20px;
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 12px 30px rgba(148, 163, 184, 0.28);
+    position: relative;
+    overflow: hidden;
+}
+
+.street::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.9), transparent 60%);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.street-header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.street-header h3 {
+    font-size: 18px;
+}
+
+.street-tag {
+    font-size: 12px;
+    color: #6b7280;
+    background: rgba(248, 250, 252, 0.9);
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+
+/* Цветовые маркеры улиц */
+
+.street-it {
+    border-left: 6px solid #0ea5e9;
+}
+
+.street-design {
+    border-left: 6px solid #ec4899;
+}
+
+.street-study {
+    border-left: 6px solid #22c55e;
+}
+
+.street-photo {
+    border-left: 6px solid #f97316;
+}
+
+/* ------- ПАВИЛЬОНЫ НА ГЛАВНОЙ (карточки объявлений) ------- */
+
+.pavilions {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+}
+
+/* важно: style только для карточек внутри .pavilions */
+.pavilions .pavilion {
+    position: relative;
+    border-radius: 18px;
+    padding-top: 28px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.86));
+    box-shadow: 0 10px 24px rgba(148, 163, 184, 0.38);
+    overflow: hidden;
+    transition: transform .16s ease-out, box-shadow .16s ease-out, translate .16s ease-out;
+}
+
+.pavilions .pavilion:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(148, 163, 184, 0.48);
+}
+
+/* Маленький тент сверху карточки */
+
+.pavilions .pavilion-top .tent-top {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 110px;
+    height: 40px;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f97316, #facc15, #fb7185);
+    clip-path: polygon(0 100%, 20% 0, 50% 25%, 80% 0, 100% 100%);
+}
+
+.pavilions .pavilion-top .tent-flag {
+    position: absolute;
+    left: 50%;
+    top: -20px;
+    width: 0;
+    height: 0;
+    border-right: 12px solid transparent;
+    border-bottom: 20px solid #ef4444;
+    transform: translateX(-50%);
+}
+
+/* Тело павильона */
+
+.pavilions .pavilion-body {
+    padding: 40px 14px 10px;
+    text-align: left;
+}
+
+.pavilions .pavilion-author-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.pavilions .pavilion-author-avatar span {
+    font-size: 18px;
+}
+
+.pavilions .pavilion-title {
+    font-size: 15px;
+    margin: 0 0 6px;
+}
+
+.pavilions .pavilion-text {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Низ карточки */
+
+.pavilions .pavilion-footer {
+    padding: 8px 14px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-top: 1px dashed rgba(203, 213, 225, 0.9);
+    background: linear-gradient(to right, rgba(248, 250, 252, 0.95), rgba(255, 247, 237, 0.95));
+}
+
+.pavilions .pavilion-author {
+    font-size: 12px;
+    color: #4b5563;
+}
+
+/* Пустая улица */
+
+.empty-street {
+    font-size: 13px;
+    color: #9ca3af;
+    margin: 8px 2px 4px;
+}
+
+/* ================== FOOTER ================== */
+
+.site-footer {
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    background: rgba(255,255,255,0.9);
+    padding: 8px 0;
+}
+
+.footer-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 16px;
+    font-size: 12px;
+    color: #6b7280;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ================== ADAPTIVE ================== */
+
+@media (max-width: 900px) {
+    .hero {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    .hero-illustration {
+        order: -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .site-header {
+        padding-inline: 16px;
+        gap: 10px;
+    }
+    .main-nav {
+        display: none;
+    }
+    .hero-text h1 {
+        font-size: 28px;
+    }
+}
+
+/* ================== STREET LIST (если используешь) ================== */
+
+/* ----- Главная: список улиц (обновлённый дизайн) ----- */
+
+.streets-section {
+    margin-top: 32px;
+}
+
+.streets-header h2 {
+    font-size: 24px;
+    margin-bottom: 6px;
+}
+
+.streets-header p {
+    font-size: 14px;
+    color: #6b7280;
+    max-width: 520px;
+}
+
+/* сетка 4×N, все карточки одинаковой высоты */
+
+.street-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.street-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.street-card-inner {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 24px;
+    padding: 18px 20px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease,
+                border-color 0.18s ease, background 0.18s ease;
+}
+
+.street-card:hover .street-card-inner {
+    transform: translateY(-4px);
+    box-shadow: 0 26px 60px rgba(15, 23, 42, 0.12);
+    border-color: rgba(129, 140, 248, 0.7);
+    background: rgba(255, 255, 255, 0.99);
+}
+
+.street-card-top {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.street-pill-code {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: linear-gradient(90deg, #eef2ff, #fef3c7);
+    color: #4b5563;
+}
+
+.street-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.street-desc {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* низ карточки */
+
+.street-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.pill-count {
+    background: #f1f5f9;
+    border-radius: 999px;
+    padding: 4px 10px;
+    color: #475569;
+}
+
+.street-link-text {
+    color: #6366f1;
+    font-weight: 500;
+}
+
+/* мелкие украшения для hero */
+
+.hero-main .hero-kicker {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+
+.hero-main .hero-meta {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pill-soft {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 999px;
+    padding: 4px 10px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    font-size: 12px;
+}
+
+/* маленькая «городская» иллюстрация справа в hero */
+
+.hero-city {
+    align-items: flex-end;
+}
+
+.city-card {
+    position: relative;
+    width: 260px;
+    height: 190px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #bae6fd, #eef2ff);
+    box-shadow: 0 22px 55px rgba(15, 23, 42, 0.18);
+}
+
+.city-sky {
+    position: absolute;
+    inset: 0 0 45% 0;
+    background: radial-gradient(circle at top, #ffffff, #bae6fd);
+}
+
+.city-buildings {
+    position: absolute;
+    inset: 25% 10% 35% 10%;
+    background: linear-gradient(90deg, #60a5fa, #a5b4fc);
+    border-radius: 18px;
+    filter: blur(1px);
+    opacity: 0.9;
+}
+
+.city-road {
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    bottom: 4%;
+    top: 52%;
+    background: radial-gradient(circle at bottom, #0f172a, #1e293b);
+    border-radius: 999px;
+}
+
+.city-tent {
+    position: absolute;
+    left: 50%;
+    bottom: 18%;
+    transform: translateX(-50%);
+    animation: tent-float 4s ease-in-out infinite;
+}
+
+.city-tent-roof {
+    width: 90px;
+    height: 26px;
+    border-radius: 14px 14px 0 0;
+    background: repeating-linear-gradient(
+        90deg,
+        #f97316 0,
+        #f97316 14px,
+        #ffffff 14px,
+        #ffffff 28px
+    );
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+.city-tent-body {
+    width: 90px;
+    height: 24px;
+    border-radius: 0 0 12px 12px;
+    background: #fef9c3;
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.25);
+    margin-top: -1px;
+}
+
+/* ================== STREET PAGE — ОБЩЕЕ ================== */
+
+.street-hero {
+    margin-bottom: 16px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: #777;
+    text-decoration: none;
+    margin-bottom: 6px;
+}
+
+.back-link:hover {
+    color: #ff4f8b;
+}
+
+.street-map-section {
+    margin-top: 10px;
+}
+
+/* базовый контейнер карты улицы */
+.street-map {
+    position: relative;
+    width: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+    background: #000;
+}
+
+/* ================== ВАРИАНТ 1 — CITY MAP С КРУГЛЫМИ ПЯТНАМИ ================== */
+
+.city-map {
+    position: relative;
+    border-radius: 32px;
+    padding: 26px;
+    background: radial-gradient(circle at top, #ffe3f2 0, #fff4dd 40%, #ffffff 90%);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+    min-height: 280px;
+    overflow: hidden;
+}
+
+.city-background {
+    position: absolute;
+    inset: 0;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.city-layer {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(28px);
+}
+
+.city-layer-back {
+    width: 55%;
+    height: 55%;
+    background: #ffb3cf;
+    top: -10%;
+    right: -10%;
+}
+
+.city-layer-middle {
+    width: 50%;
+    height: 50%;
+    background: #ffc676;
+    bottom: -15%;
+    left: 5%;
+}
+
+.city-layer-front {
+    width: 40%;
+    height: 40%;
+    background: #8fd5ff;
+    top: 20%;
+    left: 35%;
+}
+
+.pavilions-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    z-index: 1;
+}
+
+.pavilion-dot-card {
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+}
+
+.pavilion-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #ff4f8b;
+    box-shadow: 0 0 0 6px rgba(255, 79, 139, 0.25);
+    margin-bottom: 8px;
+}
+
+.pavilion-popup {
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pavilion-dot-card:hover .pavilion-popup {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.pavilion-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, #ff4f8b, #ffb347);
+    color: white;
+}
+
+.avatar-circle.big {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+}
+
+.pavilion-popup-title {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.pavilion-popup-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.empty-street.big {
+    padding: 20px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #777;
+}
+
+/* ================== AD PAGE (павильон) ================== */
+
+.ad-hero {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.ad-card-full {
+    margin-top: 18px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 28px;
+    padding: 22px 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
+}
+
+.ad-card-header {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.ad-card-header h1 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.ad-author-line,
+.ad-street-line {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.ad-card-body p {
+    font-size: 0.98rem;
+    line-height: 1.5;
+}
+
+/* ================== ВАРИАНТ 2 — УЛИЦА С ДОМИКАМИ (house.PNG) ================== */
+
+/*фон-картинка улицы*/
+.street-map .street-bg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* слой с домиками */
+.houses-layer {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 18px;
+    padding: 24px;
+    backdrop-filter: blur(2px);
+}
+
+/* карточка-домик */
+.house-card {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
+
+.house-roof {
+    width: 70%;
+    height: 18px;
+    margin: 0 auto;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(135deg, #ff4f8b, #ffc36b);
+}
+
+.house-body {
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 16px;
+    padding: 10px 12px 12px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.house-card:hover .house-body {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+}
+
+.house-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff4f8b, #ffb347);
+    color: #fff;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.house-title {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.house-author {
+    font-size: 0.8rem;
+    color: #777;
+}
+
+/* ================== ВАРИАНТ 3 — РЯД ПАЛАТОК (pavilions-row) ================== */
+
+.street-map-card {
+    position: relative;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+    background: #000;
+}
+
+/* для этого варианта фон задаётся через .street-map-bg */
+.street-map-card .street-map-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: saturate(1.05);
+}
+
+/* накладка для текста */
+.street-map-card .street-map-overlay {
+    position: relative;
+    padding: 28px 32px 32px;
+    background: linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0.6) 35%,
+        rgba(255, 255, 255, 0.85) 60%,
+        rgba(255, 255, 255, 0.95) 100%
+    );
+}
+
+/* ряд палаток */
+.pavilions-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 220px;
+}
+
+/* общий вид павильона только в этом ряду */
+.pavilions-row .pavilion {
+    width: 18%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.pavilions-row .tent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: center bottom;
+}
+
+/* крыша палатки */
+.pavilions-row .tent-roof {
+    width: 100%;
+    max-width: 110px;
+    height: 34px;
+    border-radius: 14px 14px 0 0;
+    background: repeating-linear-gradient(
+        90deg,
+        #ff4f8b 0,
+        #ff4f8b 16px,
+        #ffffff 16px,
+        #ffffff 32px
+    );
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* тело палатки */
+.pavilions-row .tent-body {
+    width: 100%;
+    max-width: 110px;
+    background: #ffffff;
+    border-radius: 0 0 16px 16px;
+    padding: 6px 8px 8px;
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.15);
+    margin-top: -1px;
+}
+
+.pavilions-row .tent-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    max-height: 3em;
+    overflow: hidden;
+}
+
+.pavilions-row .tent-master {
+    font-size: 0.7rem;
+    color: #777;
+}
+
+.pavilions-row .pavilion.has-ad .tent {
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pavilions-row .pavilion.has-ad:hover .tent {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.25);
+}
+
+.pavilions-row .pavilion.empty .tent {
+    opacity: 0.45;
+    animation: none;
+}
+
+/* ================== ВАРИАНТ 4 — ТВОЯ ТЕКУЩАЯ КАРТА С house.PNG ================== */
+
+/* слой с палатками поверх фоновой street_bg.png */
+.pavilions-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none; /* клики только по самим ссылкам-павильонам */
+}
+
+/* один павильон в слое карты */
+.pavilions-layer .pavilion {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: auto;
+    text-decoration: none;
+    color: inherit;
+}
+
+.pavilions-layer .pavilion-inner {
+    position: relative;
+    width: 140px;
+    max-width: 18vw;
+    margin: 0 auto;
+    animation: pavilion-float 4s ease-in-out infinite;
+}
+
+.pavilions-layer .pavilion-img {
+    width: 100%;
+    display: block;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* подпись под палаткой */
+.pavilions-layer .pavilion-badge {
+    margin-top: 4px;
+    padding: 4px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    min-width: 120px;
+}
+
+.pavilions-layer .pavilion-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    max-height: 2.4em;
+    overflow: hidden;
+}
+
+.pavilions-layer .pavilion-master {
+    margin-top: 2px;
+    font-size: 0.7rem;
+    color: #777;
+}
+
+/* анимация покачивания домика */
+@keyframes pavilion-float {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
+}
+
+/* hover только для реальных объявлений */
+.pavilions-layer .pavilion.has-ad:hover .pavilion-img {
+    transform: translateY(-10px) scale(1.05);
+    filter: drop-shadow(0 12px 20px rgba(255, 120, 120, 0.9));
+}
+
+.pavilions-layer .pavilion.has-ad:hover .pavilion-badge {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* пустые павильоны */
+.pavilions-layer .pavilion.empty .pavilion-inner {
+    animation: none;
+}
+
+.pavilions-layer .pavilion.empty .pavilion-img {
+    opacity: 0.45;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+}
+
+.pavilions-layer .pavilion.empty .pavilion-badge {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+/* псевдо-3D: размеры слотов */
+
+.pavilions-layer .pavilion-inner {
+    width: 140px;
+}
+
+.pavilions-layer .slot-3 .pavilion-inner {
+    width: 130px;
+}
+
+.pavilions-layer .slot-2 .pavilion-inner,
+.pavilions-layer .slot-4 .pavilion-inner {
+    width: 150px;
+}
+
+.pavilions-layer .slot-1 .pavilion-inner,
+.pavilions-layer .slot-5 .pavilion-inner {
+    width: 165px;
+}
+
+/* адаптив размеров домиков */
+
+@media (max-width: 900px) {
+    .pavilions-layer .pavilion-inner {
+        width: 110px;
+    }
+
+    .pavilions-layer .slot-3 .pavilion-inner {
+        width: 100px;
+    }
+
+    .pavilions-layer .slot-2 .pavilion-inner,
+    .pavilions-layer .slot-4 .pavilion-inner {
+        width: 120px;
+    }
+
+    .pavilions-layer .slot-1 .pavilion-inner,
+    .pavilions-layer .slot-5 .pavilion-inner {
+        width: 130px;
+    }
+}
+
+/* ===== КАРТА УЛИЦЫ С ДОРОЖКОЙ И ПАЛАТКАМИ ===== */
+
+.street-map {
+    position: relative;
+    width: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+    background: #000;
+}
+
+/* фон улицы — большая картинка */
+.street-bg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* слой с палатками поверх фона */
+.pavilions-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none; /* чтобы кликалось только по палаткам */
+}
+
+/* общие стили одного павильона */
+.pavilion {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: auto;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* “тело” палатки, скейлим для псевдо-3D */
+.pavilion-inner {
+    position: relative;
+    width: 140px;
+    max-width: 20vw;
+    margin: 0 auto;
+    animation: pavilion-float 4s ease-in-out infinite;
+}
+
+/* сама картинка палатки — ПОЛНАЯ прозрачность вокруг */
+.pavilion-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* подпись под палаткой */
+.pavilion-badge {
+    margin-top: 4px;
+    padding: 4px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    min-width: 120px;
+}
+
+.pavilion-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    max-height: 2.4em;
+    overflow: hidden;
+}
+
+.pavilion-master {
+    margin-top: 2px;
+    font-size: 0.7rem;
+    color: #777;
+}
+
+/* анимация покачивания */
+@keyframes pavilion-float {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
+}
+
+/* активный павильон (есть объявление) */
+.pavilion.has-ad .pavilion-inner {
+    cursor: pointer;
+}
+
+.pavilion.has-ad:hover .pavilion-img {
+    transform: translateY(-10px) scale(1.05);
+    filter: drop-shadow(0 12px 20px rgba(255, 120, 120, 0.9));
+}
+
+.pavilion.has-ad:hover .pavilion-badge {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* пустые павильоны более бледные, без подпрыгивания */
+.pavilion.empty .pavilion-inner {
+    animation: none;
+}
+
+.pavilion.empty .pavilion-img {
+    opacity: 0.45;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+}
+
+.pavilion.empty .pavilion-badge {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+/* --- Позиции палаток вдоль дорожки --- */
+
+/* левая ближняя к нам */
+.pavilion.slot-1 {
+    top: 72%;
+    left: 18%;
+}
+
+/* левая средняя */
+.pavilion.slot-2 {
+    top: 65%;
+    left: 34%;
+}
+
+/* центральная — прямо над дорожкой, но низко */
+.pavilion.slot-3 {
+    top: 62%;
+    left: 50%;
+}
+
+/* правая средняя */
+.pavilion.slot-4 {
+    top: 65%;
+    left: 66%;
+}
+
+/* правая ближняя к нам */
+.pavilion.slot-5 {
+    top: 72%;
+    left: 82%;
+}
+
+
+/* ===== Виджет поддержки на страницах улиц ===== */
+/* ===== Небольшой виджет поддержки внизу справа ===== */
+
+.support-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 40;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    box-shadow: 0 12px 30px rgba(148, 163, 184, 0.7);
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+.support-fab:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 16px 40px rgba(148, 163, 184, 0.9);
+}
+
+/* сам виджет */
+.support-widget {
+    position: fixed;
+    right: 24px;
+    bottom: 80px; /* чуть выше кнопки ? */
+    z-index: 39;
+    width: min(360px, 92vw);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #ffffff, #f9fafb);
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.45);
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+}
+
+.support-widget.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.support-widget-inner {
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.support-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.support-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+}
+
+.support-subtitle {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.support-close {
+    border: none;
+    background: transparent;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #9ca3af;
+}
+
+.support-close:hover {
+    color: #4b5563;
+}
+
+.support-problems {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.support-problem-btn {
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.support-problem-btn.active {
+    background: rgba(236, 72, 153, 0.08);
+    border-color: #ec4899;
+    color: #be185d;
+}
+
+.support-text-label {
+    font-size: 0.8rem;
+    color: #4b5563;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.support-textarea {
+    min-height: 60px;
+    max-height: 120px;
+    resize: vertical;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.support-textarea:focus {
+    outline: none;
+    border-color: #ec4899;
+    box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.35);
+}
+
+.support-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.support-note {
+    font-size: 0.72rem;
+    color: #9ca3af;
+}
+
+@media (max-width: 640px) {
+    .support-widget {
+        right: 12px;
+        bottom: 76px;
+        width: min(320px, 94vw);
+    }
+}
+
+/* ===== Главная: "вау"-главная ===== */
+
+.index-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 48px;
+    padding: 24px 20px 28px;
+    border-radius: 32px;
+    background: radial-gradient(circle at top left, #ffe5f5 0, #fff7e0 40%, #f3f4ff 85%);
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.index-hero::before,
+.index-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(30px);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.index-hero::before {
+    width: 220px;
+    height: 220px;
+    background: #f97316;
+    top: -80px;
+    right: 8%;
+}
+
+.index-hero::after {
+    width: 260px;
+    height: 260px;
+    background: #8b5cf6;
+    bottom: -120px;
+    left: 5%;
+}
+
+.index-hero-main {
+    position: relative;
+    z-index: 1;
+}
+
+.index-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(148,163,184,0.35);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: #6b7280;
+}
+
+.index-hero-title {
+    margin: 14px 0 8px;
+    font-size: 40px;
+    line-height: 1.05;
+}
+
+.index-hero-title span {
+    background: linear-gradient(120deg, #f97316, #ec4899, #8b5cf6);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.index-hero-text {
+    font-size: 15px;
+    color: #4b5563;
+    max-width: 520px;
+    margin-bottom: 18px;
+}
+
+.index-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.index-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-chip {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(148,163,184,0.3);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.meta-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: #9ca3af;
+}
+
+.meta-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.index-hero-illustration {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.index-hero-card {
+    width: 280px;
+    border-radius: 24px;
+    padding: 16px 16px 14px;
+    background: rgba(255,255,255,0.96);
+    box-shadow: 0 18px 50px rgba(15,23,42,0.35);
+    transform-origin: center;
+    animation: hero-card-float 6s ease-in-out infinite;
+}
+
+.index-hero-card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.index-hero-card-body {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.index-hero-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.index-hero-card-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.index-hero-card-subtitle {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.index-hero-card-footer {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.index-hero-bubbles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.index-hero-bubbles span {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 8px 18px rgba(15,23,42,0.15);
+}
+
+/* анимация карточки справа */
+@keyframes hero-card-float {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-8px); }
+    100% { transform: translateY(0); }
+}
+
+/* ===== Сетка улиц ===== */
+
+.index-streets {
+    margin-top: 40px;
+    position: relative;
+}
+
+.index-streets-header h2 {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.index-streets-header p {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* мягкие «орбиты» фона под сеткой */
+.index-streets-bg-orbit {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(40px);
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.index-streets-bg-orbit.orbit-1 {
+    width: 260px;
+    height: 260px;
+    background: #fee2e2;
+    top: 10%;
+    left: -60px;
+}
+
+.index-streets-bg-orbit.orbit-2 {
+    width: 280px;
+    height: 280px;
+    background: #e0f2fe;
+    bottom: -40px;
+    right: -40px;
+}
+
+/* сетка карточек улиц */
+.index-street-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+}
+
+/* карточки одинаковой высоты */
+.index-street-card {
+    text-decoration: none;
+    color: inherit;
+    perspective: 1000px;
+}
+
+.index-street-card-inner {
+    height: 100%;
+    min-height: 210px;
+    padding: 18px 18px 16px;
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
+    box-shadow: 0 16px 40px rgba(15,23,42,0.08);
+    border: 1px solid rgba(226,232,240,0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.index-street-card:hover .index-street-card-inner {
+    transform: translateY(-6px) rotateX(2deg);
+    box-shadow: 0 28px 70px rgba(15,23,42,0.16);
+    border-color: rgba(248,113,113,0.7);
+}
+
+.index-street-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: #9ca3af;
+    margin-bottom: 8px;
+}
+
+.index-street-name {
+    font-size: 18px;
+    margin: 0 0 6px;
+}
+
+.index-street-desc {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 14px;
+}
+
+.index-street-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+}
+
+.index-street-stat {
+    color: #4b5563;
+}
+
+.index-street-link {
+    font-weight: 500;
+    color: #ec4899;
+}
+
+/* адаптив */
+
+@media (max-width: 980px) {
+    .index-hero {
+        grid-template-columns: 1fr;
+        padding: 20px 18px 22px;
+    }
+    .index-hero-illustration {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    .index-hero-title {
+        font-size: 30px;
+    }
+    .index-hero-meta {
+        gap: 6px;
+    }
+}
+

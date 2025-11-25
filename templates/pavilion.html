@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pavilion.title }} — {{ pavilion.street.name }}{% endblock %}
+
+{% block content %}
+<section class="ad-hero">
+    <a href="{{ url_for('street_page', code=pavilion.street.code) }}" class="back-link">
+        ← Вернуться на {{ pavilion.street.name }}
+    </a>
+
+    <h1>{{ pavilion.title }}</h1>
+    {% if pavilion.description %}
+        <p>{{ pavilion.description }}</p>
+    {% else %}
+        <p>Объявления мастеров по теме этой улицы.</p>
+    {% endif %}
+</section>
+
+<section class="pavilion-ads-list">
+    {% if ads %}
+        <div class="pavilion-ads-grid">
+            {% for ad in ads %}
+                <a href="{{ url_for('ad_page', ad_id=ad.id) }}" class="pavilion-ad-card">
+                    <div class="pavilion-ad-card-inner">
+                        <div class="avatar-circle big">
+                            {{ ad.author_name[0] }}
+                        </div>
+                        <h2 class="pavilion-ad-title">{{ ad.title }}</h2>
+                        <p class="pavilion-ad-text">
+                            {{ ad.text }}
+                        </p>
+                        <div class="pavilion-ad-meta">
+                            Мастер: {{ ad.author_name }}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-street big">
+            Пока объявлений нет. Здесь скоро появятся мастера по этой теме.
+        </p>
+    {% endif %}
+</section>
+{% endblock %}

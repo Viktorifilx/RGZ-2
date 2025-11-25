@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Цифровая ярмарка мастеров{% endblock %}
+
+{% block content %}
+<div class="index-hero">
+    <div class="index-hero-main">
+        <span class="index-hero-badge">онлайн-пространство помощи и творчества</span>
+        <h1 class="index-hero-title">
+            Найди своего мастера<br>
+            <span>на цифровой ярмарке</span>
+        </h1>
+        <p class="index-hero-text">
+            На каждой улице — свои мастера: программисты, дизайнеры, репетиторы и творцы.
+            Загляни в домик-павильон и посмотри, кто готов помочь сегодня.
+        </p>
+        <div class="index-hero-actions">
+            <a href="#streets" class="btn btn-primary">Перейти к улицам</a>
+            <button class="btn btn-outline" type="button">
+                Как работает ярмарка?
+            </button>
+        </div>
+        <div class="index-hero-meta">
+            <div class="meta-chip">
+                <span class="meta-label">Улиц</span>
+                <span class="meta-value">{{ streets|length }}</span>
+            </div>
+            <div class="meta-chip">
+                <span class="meta-label">Павильонов</span>
+                <span class="meta-value">
+                    {{ streets|map(attribute='ads')|map('length')|sum }}
+                </span>
+            </div>
+            <div class="meta-chip">
+                <span class="meta-label">Формат</span>
+                <span class="meta-value">учёба • код • креатив</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="index-hero-illustration">
+        <div class="index-hero-card">
+            <div class="index-hero-card-header">
+                <span class="pill pill-light">Пример павильона</span>
+            </div>
+            <div class="index-hero-card-body">
+                <div class="index-hero-avatar">PY</div>
+                <div>
+                    <div class="index-hero-card-title">Помощь с Python и SQL</div>
+                    <div class="index-hero-card-subtitle">
+                        Быстрый разбор лабораторных в удобном формате.
+                    </div>
+                </div>
+            </div>
+            <div class="index-hero-card-footer">
+                Мастер: условный Иван • 1–2 встречи
+            </div>
+        </div>
+        <div class="index-hero-bubbles">
+            <span>IT</span>
+            <span>дизайн</span>
+            <span>учёба</span>
+            <span>фото</span>
+        </div>
+    </div>
+</div>
+
+<section id="streets" class="index-streets">
+    <div class="index-streets-header">
+        <h2>Улицы ярмарки</h2>
+        <p>
+            Выбери улицу по интересам — внутри тебя ждут домики-павильоны мастеров.
+        </p>
+    </div>
+
+    <div class="index-streets-bg-orbit orbit-1"></div>
+    <div class="index-streets-bg-orbit orbit-2"></div>
+
+    <div class="index-street-grid">
+        {% for street in streets %}
+            <a href="{{ url_for('street_page', code=street.code) }}" class="index-street-card">
+                <div class="index-street-card-inner">
+                    <div class="index-street-tag">
+                        {% if street.code == 'it' %}
+                            IT & разработка
+                        {% elif street.code == 'design' %}
+                            Дизайн & визуал
+                        {% elif street.code == 'study' %}
+                            Учёба & репетиторство
+                        {% elif street.code == 'photo' %}
+                            Фото & креатив
+                        {% else %}
+                            Улица №{{ loop.index }}
+                        {% endif %}
+                    </div>
+
+                    <h3 class="index-street-name">{{ street.name }}</h3>
+
+                    <p class="index-street-desc">
+                        {% if street.code == 'it' %}
+                            Помощь с программированием, лабораторными, проектами и разбором кода.
+                        {% elif street.code == 'design' %}
+                            Презентации, графика, визуал для соцсетей и учебных проектов.
+                        {% elif street.code == 'study' %}
+                            Конспекты, подготовка к зачётам и экзаменам, объяснение теории.
+                        {% elif street.code == 'photo' %}
+                            Фотосессии, обработка, оформление аватарок и портфолио.
+                        {% else %}
+                            Пространство мастеров этой улицы.
+                        {% endif %}
+                    </p>
+
+                    <div class="index-street-footer">
+                        <span class="index-street-stat">
+                            Павильонов: {{ street.ads|length }}
+                        </span>
+                        <span class="index-street-link">
+                            Перейти на улицу →
+                        </span>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

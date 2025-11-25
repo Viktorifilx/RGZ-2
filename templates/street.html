@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ street.name }} — ярмарка{% endblock %}
+
+{% block content %}
+<section class="street-hero">
+    <a href="{{ url_for('index') }}" class="back-link">← Вернуться на ярмарочную площадь</a>
+    <h1>{{ street.name }}</h1>
+    <p>Выберите домик-павильон вдоль дорожки 👇</p>
+</section>
+
+<section class="street-map-section">
+    <div class="street-map">
+        <!-- фон улицы -->
+        <img
+            src="{{ url_for('static', filename='images/street_bg.png') }}"
+            alt="Карта улицы"
+            class="street-bg"
+        >
+
+        <!-- слой с палатками -->
+        <div class="pavilions-layer">
+            {% set max_slots = 5 %}
+            {% set pav_list = pavilions[:max_slots] %}
+
+            {% for slot in range(1, max_slots + 1) %}
+                {% set pav = pav_list[loop.index0] if loop.index0 < pav_list|length else None %}
+
+                {% if pav %}
+                    <a href="{{ url_for('pavilion_page', pavilion_id=pav.id) }}"
+                       class="pavilion slot-{{ slot }} has-ad">
+                        <div class="pavilion-inner">
+                            <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                 alt="Павильон"
+                                 class="pavilion-img">
+                            <div class="pavilion-badge">
+                                <div class="pavilion-title">{{ pav.title }}</div>
+                                <div class="pavilion-master">
+                                    Тематических объявлений: {{ pav.ads|length }}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% else %}
+                    <div class="pavilion slot-{{ slot }} empty">
+                        <div class="pavilion-inner">
+                            <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                 alt="Свободный павильон"
+                                 class="pavilion-img">
+                            <div class="pavilion-badge">
+                                <div class="pavilion-title">Свободный павильон</div>
+                                <div class="pavilion-master">Место для новой темы</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Плавающая кнопка поддержки -->
+<button class="support-fab" id="support-fab" type="button">
+    ?
+</button>
+
+<!-- Небольшой виджет поддержки справа снизу -->
+<div class="support-widget" id="support-widget">
+    <div class="support-widget-inner">
+        <div class="support-header">
+            <div>
+                <div class="support-title">Поддержка ярмарки</div>
+                <div class="support-subtitle">
+                    Короткий вопрос? Напишите нам 👋
+                </div>
+            </div>
+            <button class="support-close" id="support-close" type="button">×</button>
+        </div>
+
+        <div class="support-problems">
+            <button class="support-problem-btn active"
+                    data-template="Мне нужна помощь с работой сайта (ошибка/страница не открывается).">
+                Проблема с сайтом
+            </button>
+            <button class="support-problem-btn"
+                    data-template="Хочу уточнить вопрос по работе ярмарки и павильонов.">
+                Вопрос по ярмарке
+            </button>
+            <button class="support-problem-btn"
+                    data-template="Хочу пожаловаться на объявление (спам/некорректный контент).">
+                Жалоба на объявление
+            </button>
+            <button class="support-problem-btn"
+                    data-template="Другое обращение.">
+                Другое
+            </button>
+        </div>
+
+        <label class="support-text-label">
+            Ваше сообщение
+            <textarea id="support-textarea" class="support-textarea"
+                      placeholder="Коротко опишите проблему или вопрос"></textarea>
+        </label>
+
+        <div class="support-actions">
+            <button class="btn btn-primary support-send" id="support-send" type="button">
+                Отправить (демо)
+            </button>
+            <span class="support-note">
+                Это демо: текст не отправляется на сервер, только имитация чата 🙂
+            </span>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fab = document.getElementById('support-fab');
+    const widget = document.getElementById('support-widget');
+    const closeBtn = document.getElementById('support-close');
+    const problemButtons = document.querySelectorAll('.support-problem-btn');
+    const textarea = document.getElementById('support-textarea');
+    const sendBtn = document.getElementById('support-send');
+
+    const STORAGE_KEY = 'fair_support_shown';
+
+    function openSupport() {
+        widget.classList.add('is-open');
+    }
+
+    function closeSupport() {
+        widget.classList.remove('is-open');
+    }
+
+    if (!sessionStorage.getItem(STORAGE_KEY)) {
+        openSupport();
+        sessionStorage.setItem(STORAGE_KEY, '1');
+    }
+
+    fab.addEventListener('click', function () {
+        if (widget.classList.contains('is-open')) {
+            closeSupport();
+        } else {
+            openSupport();
+        }
+    });
+
+    closeBtn.addEventListener('click', closeSupport);
+
+    problemButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            problemButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const template = btn.getAttribute('data-template') || '';
+            textarea.value = template;
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+        });
+    });
+
+    sendBtn.addEventListener('click', () => {
+        if (!textarea.value.trim()) {
+            alert('Пожалуйста, опишите хотя бы пару слов 🙂');
+            return;
+        }
+        alert('Спасибо! В реальной версии это ушло бы в поддержку:\n\n' + textarea.value.trim());
+        closeSupport();
+    });
+});
+</script>
+{% endblock %}

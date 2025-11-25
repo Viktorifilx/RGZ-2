@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ad.title }} — объявление мастера{% endblock %}
+
+{% block content %}
+<section class="ad-hero">
+    <a href="{{ url_for('pavilion_page', pavilion_id=ad.pavilion.id) }}" class="back-link">
+        ← К павильону «{{ ad.pavilion.title }}»
+    </a>
+
+    <div class="ad-card-full">
+        <div class="ad-card-header">
+            <div class="avatar-circle big">
+                {{ ad.author_name[0] }}
+            </div>
+            <div>
+                <h1>{{ ad.title }}</h1>
+                <div class="ad-author-line">
+                    Мастер: {{ ad.author_name }}
+                </div>
+                <div class="ad-street-line">
+                    Улица: {{ ad.pavilion.street.name }} • Павильон: {{ ad.pavilion.title }}
+                </div>
+            </div>
+        </div>
+
+        <div class="ad-card-body">
+            <p>{{ ad.text }}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
