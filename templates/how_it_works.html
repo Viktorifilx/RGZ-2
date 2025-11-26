@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+
+{% block title %}Как работает ярмарка — FairMarket{% endblock %}
+
+{% block content %}
+<style>
+    .how-wrapper {
+        min-height: calc(100vh - 140px);
+        padding: 40px 20px 80px;
+        background:
+            radial-gradient(circle at 0 0, #ffe9f7 0, transparent 55%),
+            radial-gradient(circle at 100% 30%, #ffe9d2 0, transparent 55%),
+            radial-gradient(circle at 0 100%, #e5f0ff 0, transparent 55%);
+    }
+
+    .how-container {
+        max-width: 1040px;
+        margin: 0 auto;
+    }
+
+    .how-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #555;
+        text-decoration: none;
+        margin-bottom: 18px;
+        transition: .2s;
+    }
+    .how-back:hover {
+        color: #000;
+        transform: translateX(-3px);
+    }
+
+    .how-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2.4fr);
+        gap: 32px;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .how-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(0,0,0,0.04);
+        font-size: 11px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .how-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ff4fd8, #ff9a3c);
+        box-shadow: 0 0 10px rgba(255,79,216,.6);
+    }
+
+    .how-title {
+        font-size: 34px;
+        line-height: 1.1;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+    .how-title span {
+        background: linear-gradient(90deg,#ff4fd8,#ff9a3c);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .how-subtitle {
+        font-size: 15px;
+        color: #444;
+        max-width: 520px;
+        line-height: 1.5;
+    }
+
+    .how-pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+    }
+    .how-pill {
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(0,0,0,0.03);
+        color: #555;
+    }
+
+    .how-card {
+        position: relative;
+        padding: 22px 22px 18px;
+        border-radius: 24px;
+        background: rgba(255,255,255,0.92);
+        box-shadow: 0 18px 36px rgba(15,23,42,0.14);
+        overflow: hidden;
+    }
+    .how-card::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: conic-gradient(from 220deg,
+                    rgba(255,79,216,0.20),
+                    rgba(99,102,241,0.18),
+                    rgba(255,153,102,0.26),
+                    rgba(255,79,216,0.20));
+        opacity: 0.75;
+        z-index: -1;
+    }
+    .how-card-inner {
+        background: rgba(255,255,255,0.94);
+        backdrop-filter: blur(8px);
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.9);
+        padding: 16px 18px 14px;
+    }
+
+    .how-steps-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .how-steps-caption {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 14px;
+    }
+
+    .how-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+    .how-step {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: flex-start;
+        padding: 8px 10px;
+        border-radius: 14px;
+        background: rgba(248,250,252,0.9);
+    }
+    .how-step-number {
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg,#ff4fd8,#ff9a3c);
+        box-shadow: 0 0 10px rgba(255,79,216,.5);
+    }
+    .how-step-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .how-step-text {
+        font-size: 13px;
+        color: #555;
+        line-height: 1.45;
+    }
+
+    .how-section {
+        margin-top: 40px;
+    }
+    .how-section h2 {
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+    .how-section p {
+        font-size: 14px;
+        color: #555;
+        max-width: 720px;
+    }
+
+    .how-grid {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+        gap: 16px;
+    }
+    .how-tile {
+        border-radius: 18px;
+        background: rgba(255,255,255,0.96);
+        padding: 14px 14px 12px;
+        box-shadow: 0 8px 22px rgba(15,23,42,0.08);
+    }
+    .how-tile-kicker {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #999;
+        margin-bottom: 4px;
+    }
+    .how-tile-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .how-tile p {
+        font-size: 13px;
+        color: #555;
+    }
+
+    .how-anim-block {
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .how-anim-note {
+        font-size: 13px;
+        color: #444;
+        line-height: 1.6;
+    }
+    .how-anim-note ul {
+        margin: 8px 0 0 18px;
+        padding: 0;
+        font-size: 13px;
+    }
+    .how-anim-note li {
+        margin-bottom: 4px;
+    }
+
+    /* демо-карточка справа */
+    .how-anim-demo {
+        border-radius: 20px;
+        padding: 18px;
+        background: radial-gradient(circle at 20% 0, #ffe3ff 0, transparent 60%),
+                    radial-gradient(circle at 100% 100%, #e5f0ff 0, transparent 60%),
+                    #ffffff;
+        box-shadow: 0 12px 28px rgba(15,23,42,0.16);
+        position: relative;
+        overflow: hidden;
+    }
+    .how-anim-demo-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    /* Мини-улица с настоящими картинками палаток */
+    .how-mini-street {
+        position: relative;
+        border-radius: 18px;
+        padding: 24px 24px 30px;
+        background: linear-gradient(180deg,#f9fafb,#e5edff);
+        overflow: hidden;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .how-mini-road {
+        position: absolute;
+        left: -6%;
+        right: -6%;
+        bottom: 18px;
+        height: 56px;
+        background: linear-gradient(180deg,#fed7aa,#f97316);
+        border-radius: 999px;
+        z-index: 0;
+    }
+
+    .how-mini-row {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 18px;
+    }
+
+    .how-mini-house {
+        flex: 0 0 30%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        animation: tentFloat 4s ease-in-out infinite;
+        transform-origin: bottom center;
+    }
+    .how-mini-house:nth-child(2) { animation-delay: .25s; }
+    .how-mini-house:nth-child(3) { animation-delay: .5s; }
+
+    .how-mini-house-img {
+        width: 130px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        filter: drop-shadow(0 10px 20px rgba(15,23,42,0.35));
+        transition: transform .25s, filter .25s;
+    }
+
+    .how-mini-label {
+        font-weight: 600;
+        font-size: 12px;
+    }
+    .how-mini-sub {
+        font-size: 11px;
+        color: #4b5563;
+    }
+
+    .how-mini-house:hover {
+        animation-play-state: paused;
+    }
+    .how-mini-house:hover .how-mini-house-img {
+        transform: translateY(-4px) scale(1.03);
+        filter: drop-shadow(0 14px 26px rgba(15,23,42,0.5));
+    }
+
+    @keyframes tentFloat {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-6px); }
+    }
+
+    /* История проекта */
+    .how-story {
+        margin-top: 46px;
+    }
+    .how-story-inner {
+        margin-top: 16px;
+        border-radius: 22px;
+        padding: 18px 18px 16px;
+        background: linear-gradient(120deg,
+                    rgba(255,79,216,0.12),
+                    rgba(129,140,248,0.10),
+                    rgba(56,189,248,0.10));
+        box-shadow: 0 14px 32px rgba(15,23,42,0.12);
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: 18px;
+        align-items: center;
+    }
+    .how-story-text {
+        font-size: 13px;
+        color: #374151;
+        line-height: 1.6;
+    }
+    .how-story-text b {
+        font-weight: 700;
+    }
+    .how-story-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 11px;
+    }
+    .how-story-pills span {
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.9);
+    }
+    .how-story-preview {
+        position: relative;
+        border-radius: 18px;
+        background: radial-gradient(circle at 0 0,#fef3c7 0,transparent 60%),
+                    radial-gradient(circle at 100% 100%,#e0f2fe 0,transparent 60%),
+                    #f9fafb;
+        padding: 10px 12px 14px;
+    }
+    .how-story-label {
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #6b21a8;
+    }
+    .how-story-img-wrap {
+        position: relative;
+        width: 170px;
+        margin: 0 auto;
+    }
+    .how-story-img-wrap img {
+        width: 100%;
+        display: block;
+        filter: drop-shadow(0 18px 26px rgba(15,23,42,0.35));
+        animation: tentFloat 5s ease-in-out infinite;
+    }
+
+    @media (max-width: 820px) {
+        .how-hero {
+            grid-template-columns: 1fr;
+        }
+        .how-anim-block {
+            grid-template-columns: 1fr;
+        }
+        .how-story-inner {
+            grid-template-columns: 1fr;
+        }
+        .how-story-preview {
+            justify-self: center;
+        }
+    }
+</style>
+
+<div class="how-wrapper">
+    <div class="how-container">
+        <a href="{{ url_for('index') }}" class="how-back">← На главную</a>
+
+        <!-- ГЛАВНЫЙ БЛОК -->
+        <section class="how-hero">
+            <div>
+                <div class="how-kicker">
+                    <span class="how-dot"></span>
+                    гид по цифровой ярмарке
+                </div>
+                <h1 class="how-title">
+                    Как работает <span>цифровая ярмарка</span>
+                </h1>
+                <p class="how-subtitle">
+                    FairMarket — это небольшой онлайн-город. У него есть улицы, домики-павильоны
+                    и мастера, которые помогают с кодом, учёбой, дизайном и креативом. Ниже —
+                    короткий маршрут, как не заблудиться.
+                </p>
+
+                <div class="how-pill-row">
+                    <span class="how-pill">1 улица = отдельная тема</span>
+                    <span class="how-pill">в каждом домике — объявления мастеров</span>
+                    <span class="how-pill">можно просто гулять и собирать идеи</span>
+                </div>
+            </div>
+
+            <div class="how-card">
+                <div class="how-card-inner">
+                    <div class="how-steps-title">Твой путь по ярмарке</div>
+                    <div class="how-steps-caption">
+                        Пролистай шаги — так устроено большинство экранов сайта.
+                    </div>
+                    <div class="how-steps">
+                        <div class="how-step">
+                            <div class="how-step-number">1</div>
+                            <div>
+                                <div class="how-step-title">Выбери улицу по настроению</div>
+                                <div class="how-step-text">
+                                    Техно-улица, Арбат творчества, Аллея знаний, Киберпроспект и другие
+                                    цифровые кварталы. Каждая улица отвечает за своё направление.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="how-step">
+                            <div class="how-step-number">2</div>
+                            <div>
+                                <div class="how-step-title">Найди домик-павильон</div>
+                                <div class="how-step-text">
+                                    На карте улицы выбери один из домиков. Подпись под домиком
+                                    подскажет, какие объявления внутри: Python, презентации, фото,
+                                    вдохновение и т.д.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="how-step">
+                            <div class="how-step-number">3</div>
+                            <div>
+                                <div class="how-step-title">Открой объявления мастеров</div>
+                                <div class="how-step-text">
+                                    Внутри павильона — список объявлений. Каждое описывает, с чем
+                                    именно помогает мастер: задания, проекты, разборы, идеи.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="how-step">
+                            <div class="how-step-number">4</div>
+                            <div>
+                                <div class="how-step-title">Авторизация и роли</div>
+                                <div class="how-step-text">
+                                    При входе ты можешь выбрать формат: размещать объявления
+                                    или пользоваться услугами других. Это влияет на дальнейшие кнопки
+                                    и сценарии сайта.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="how-step">
+                            <div class="how-step-number">5</div>
+                            <div>
+                                <div class="how-step-title">Навигация и прокрутка</div>
+                                <div class="how-step-text">
+                                    Все страницы сделаны так, чтобы их можно было спокойно
+                                    пролистывать сверху вниз: сначала вводный блок, ниже —
+                                    детали, подсказки и примеры.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- УЛИЦЫ / ПАВИЛЬОНЫ / ОБЪЯВЛЕНИЯ -->
+        <section class="how-section">
+            <h2>Что означают улицы, павильоны и объявления</h2>
+            <p>
+                На главной странице ты видишь «карточки улиц». При переходе по ним
+                открывается карта с домиками-павильонами. Каждый домик — это маленький
+                тематический уголок, внутри которого собраны объявления.
+            </p>
+
+            <div class="how-grid">
+                <div class="how-tile">
+                    <div class="how-tile-kicker">Улицы</div>
+                    <div class="how-tile-title">Цифровые районы города</div>
+                    <p>
+                        Техно-улица, Арбат творчества, Аллея знаний и другие. Они
+                        помогают быстро понять, в каком направлении ты сейчас гуляешь:
+                        код, дизайн, учёба, идеи или цифровая грамотность.
+                    </p>
+                </div>
+                <div class="how-tile">
+                    <div class="how-tile-kicker">Павильоны</div>
+                    <div class="how-tile-title">Домики по узкой теме</div>
+                    <p>
+                        Внутри одной улицы павильоны делятся по подтемам: «Python &amp; Flask»,
+                        «Математика и статистика», «Аватарки и портреты» и т.п.
+                        Так проще найти именно тот формат помощи, который нужен.
+                    </p>
+                </div>
+                <div class="how-tile">
+                    <div class="how-tile-kicker">Объявления</div>
+                    <div class="how-tile-title">Конкретные предложения мастеров</div>
+                    <p>
+                        Каждое объявление — это мини-карточка помощи: чем занимается мастер,
+                        с какими задачами работает и в каком формате удобнее общаться.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- АНИМАЦИИ + МИНИ-УЛИЦА -->
+        <section class="how-section">
+            <h2>Небольшая инструкция по анимациям</h2>
+            <div class="how-anim-block">
+                <div class="how-anim-note">
+                    На ярмарке много мягких анимаций: они помогают понять, что с элементом
+                    можно взаимодействовать, но не отвлекают от текста.
+                    <ul>
+                        <li><b>Подсветка при наведении.</b> Карточки улиц и домики-павильоны чуть
+                            приподнимаются и подсвечиваются — значит, по ним можно кликнуть.</li>
+                        <li><b>Анимация палаток.</b> На карте улицы деревянные домики могут
+                            слегка «качаться» при появлении страницы. Это просто визуальный эффект,
+                            он не мешает прокрутке.</li>
+                        <li><b>Прокрутка страницы.</b> Все анимации рассчитаны так, чтобы сайт
+                            спокойно листался: если что-то мигает или двигается, достаточно
+                            прокрутить ниже — дальше будет статичный контент.</li>
+                        <li><b>Пауза при наведении.</b> В интерактивных блоках (как в примере справа)
+                            анимация останавливается, если навести курсор на домик — так легче
+                            прочитать подписи.</li>
+                    </ul>
+                </div>
+
+                <div class="how-anim-demo">
+                    <div class="how-anim-demo-title">Мини-пример: улица с домиками</div>
+                    <div class="how-mini-street">
+                        <div class="how-mini-road"></div>
+
+                        <div class="how-mini-row">
+                            <div class="how-mini-house">
+                                <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                     alt="Павильон на техно-улице"
+                                     class="how-mini-house-img">
+                                <div class="how-mini-label">Техно-улица</div>
+                                <div class="how-mini-sub">код • базы данных</div>
+                            </div>
+
+                            <div class="how-mini-house">
+                                <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                     alt="Павильон Арбат творчества"
+                                     class="how-mini-house-img">
+                                <div class="how-mini-label">Арбат творчества</div>
+                                <div class="how-mini-sub">дизайн • презентации</div>
+                            </div>
+
+                            <div class="how-mini-house">
+                                <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                     alt="Павильон Аллея знаний"
+                                     class="how-mini-house-img">
+                                <div class="how-mini-label">Аллея знаний</div>
+                                <div class="how-mini-sub">матан • экономика</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ИСТОРИЯ ПРОЕКТА -->
+        <section class="how-section how-story">
+            <h2>Откуда взялась идея ярмарки и деревянных домиков</h2>
+            <div class="how-story-inner">
+                <div class="how-story-text">
+                    <p>
+                        Идея ярмарки появилась из&nbsp;офлайн-города: на настоящих школьных
+                        и городских ярмарках всегда есть <b>деревянные палатки</b>, которые
+                        выстраиваются в линию вдоль улицы. Захотелось перенести это ощущение
+                        в цифровой формат — чтобы сайт выглядел как маленький городок проектов.
+                    </p>
+                    <p>
+                        Один домик был аккуратно собран в графическом редакторе,
+                        и теперь это <b>главный модуль</b> всей ярмарки: он используется на всех
+                        улицах, слегка подсвечивается при наведении и «качаетcя» при появлении
+                        страницы, как настоящая палатка на ветру.
+                    </p>
+                    <div class="how-story-pills">
+                        <span>#учебный_проект</span>
+                        <span>#цифровая_ярмарка</span>
+                        <span>#деревянные_домики</span>
+                        <span>#уют_вместо_перегруза</span>
+                    </div>
+                </div>
+
+                <div class="how-story-preview">
+                    <div class="how-story-label">Прототип домика-павильона</div>
+                    <div class="how-story-img-wrap">
+                        <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                             alt="Авторская палатка ярмарки">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ЧТО ДЕЛАТЬ ДАЛЬШЕ -->
+        <section class="how-section" style="margin-top: 46px;">
+            <h2>Что делать дальше</h2>
+            <p>
+                Вернись на главную, выбери улицу по настроению и просто начни
+                прогуливаться по павильонам. Ярмарка задумывалась как место,
+                где можно не только «быстро решить задачу», но и найти людей,
+                с которыми приятно делать проекты.
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

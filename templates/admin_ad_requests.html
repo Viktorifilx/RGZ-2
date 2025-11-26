@@ -1,0 +1,276 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Заявки — объявления{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+    <!-- Шапка страницы -->
+    <div class="admin-page-header">
+        <h1 class="admin-page-title">Заявки</h1>
+        <p class="admin-page-subtitle">
+            Все заявки мастеров на размещение объявлений в павильонах.
+        </p>
+    </div>
+
+    <!-- Табы: улицы / объявления -->
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin_requests') }}" class="admin-tab">
+            Новые улицы
+        </a>
+        <a href="{{ url_for('admin_ad_requests') }}" class="admin-tab admin-tab-active">
+            Объявления
+        </a>
+    </div>
+
+    <!-- Статистика по заявкам -->
+    <section class="admin-cards-row">
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Всего</div>
+            <div class="admin-stat-value">{{ stats.total }}</div>
+        </div>
+        <div class="admin-stat-card admin-stat-card-orange">
+            <div class="admin-stat-label">Новые</div>
+            <div class="admin-stat-value">{{ stats.pending }}</div>
+        </div>
+        <div class="admin-stat-card admin-stat-card-green">
+            <div class="admin-stat-label">Одобрено</div>
+            <div class="admin-stat-value">{{ stats.approved }}</div>
+        </div>
+        <div class="admin-stat-card admin-stat-card-red">
+            <div class="admin-stat-label">Отклонено</div>
+            <div class="admin-stat-value">{{ stats.rejected }}</div>
+        </div>
+    </section>
+
+    <!-- Таблица заявок -->
+    <section class="admin-section">
+        <h2 class="admin-section-title">Заявки на объявления</h2>
+
+        {% if requests %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Дата</th>
+                        <th>Мастер</th>
+                        <th>Павильон</th>
+                        <th>Улица</th>
+                        <th>Заголовок</th>
+                        <th>Статус</th>
+                        <th class="admin-table-actions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requests %}
+                    <tr>
+                        <td>#{{ r.id }}</td>
+                        <td>{{ r.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+                        <td>{{ r.user.username }}</td>
+                        <td>{{ r.pavilion.title }}</td>
+                        <td>{{ r.pavilion.street.name }}</td>
+                        <td>{{ r.title }}</td>
+                        <td>
+                            {% if r.status == "pending" %}
+                                <span class="badge badge-orange">pending</span>
+                            {% elif r.status == "approved" %}
+                                <span class="badge badge-green">approved</span>
+                            {% elif r.status == "rejected" %}
+                                <span class="badge badge-red">rejected</span>
+                            {% else %}
+                                <span class="badge">{{ r.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="admin-table-actions">
+                            {% if r.status == "pending" %}
+                                <form method="post"
+                                      action="{{ url_for('admin_approve_ad_request', req_id=r.id) }}"
+                                      class="inline-form">
+                                    <button type="submit" class="btn btn-approve">Опубликовать</button>
+                                </form>
+                                <form method="post"
+                                      action="{{ url_for('admin_reject_ad_request', req_id=r.id) }}"
+                                      class="inline-form">
+                                    <button type="submit" class="btn btn-reject">Отклонить</button>
+                                </form>
+                            {% else %}
+                                <span class="admin-status-note">
+                                    Заявка уже обработана
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="admin-empty">
+                Заявок пока нет. Как только мастера начнут предлагать объявления в павильоны,
+                они появятся здесь.
+            </p>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    .admin-page { padding: 8px 24px 32px; }
+
+    .admin-page-header {
+        margin-bottom: 14px;
+    }
+    .admin-page-title {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+    .admin-page-subtitle {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .admin-tabs {
+        display: inline-flex;
+        gap: 6px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(148,163,184,0.12);
+        margin-bottom: 18px;
+    }
+    .admin-tab {
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        text-decoration: none;
+        color: #4b5563;
+    }
+    .admin-tab-active {
+        background: #ffffff;
+        box-shadow: 0 8px 20px rgba(148,163,184,0.25);
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .admin-cards-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .admin-stat-card {
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+    }
+    .admin-stat-card-orange { border-left: 4px solid #f97316; }
+    .admin-stat-card-green  { border-left: 4px solid #22c55e; }
+    .admin-stat-card-red    { border-left: 4px solid #ef4444; }
+
+    .admin-stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 2px;
+    }
+    .admin-stat-value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .admin-section-title {
+        font-size: 18px;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .admin-table-wrapper {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+        padding: 10px 12px;
+        overflow-x: auto;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .admin-table thead {
+        background: #f9fafb;
+    }
+    .admin-table th,
+    .admin-table td {
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+    }
+    .admin-table th {
+        font-weight: 600;
+        color: #4b5563;
+        font-size: 12px;
+    }
+    .admin-table-actions {
+        text-align: right;
+    }
+
+    .inline-form {
+        display: inline-block;
+        margin: 0 0 0 4px;
+    }
+
+    .btn.btn-approve {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: none;
+        font-size: 12px;
+        cursor: pointer;
+        background: linear-gradient(135deg, #22c55e, #4ade80);
+        color: #fff;
+        font-weight: 600;
+    }
+    .btn.btn-reject {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: none;
+        font-size: 12px;
+        cursor: pointer;
+        background: #fee2e2;
+        color: #b91c1c;
+        font-weight: 600;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: #e5e7eb;
+        color: #374151;
+    }
+    .badge-orange { background: #ffedd5; color: #c2410c; }
+    .badge-green  { background: #dcfce7; color: #166534; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+
+    .admin-empty {
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 10px;
+    }
+
+    .admin-status-note {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    @media (max-width: 900px) {
+        .admin-cards-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Заявки — новые улицы{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Заявки</h1>
+    <p class="admin-page-subtitle">
+        Здесь собираются запросы на новые улицы и заявки на объявления в павильонах.
+    </p>
+</div>
+
+<div class="admin-tabs">
+    <a href="{{ url_for('admin_requests') }}" class="admin-tab admin-tab-active">
+        Новые улицы
+    </a>
+    <a href="{{ url_for('admin_ad_requests') }}" class="admin-tab">
+        Объявления
+    </a>
+</div>
+
+<section class="admin-section">
+    <h2 class="admin-section-title">Заявки на новые улицы</h2>
+    <p class="admin-section-text">
+        Здесь появляются запросы от мастеров на создание новых улиц и первых павильонов.
+        Одобряй те, что подходят концепции ярмарки, или отклоняй, если идея не подходит.
+    </p>
+
+    <!-- Сводка по заявкам -->
+    <div class="admin-stat-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Всего заявок</div>
+            <div class="admin-stat-value">{{ stats.total }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Новые</div>
+            <div class="admin-stat-value">{{ stats.pending }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Одобрено</div>
+            <div class="admin-stat-value">{{ stats.approved }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Отклонено</div>
+            <div class="admin-stat-value">{{ stats.rejected }}</div>
+        </div>
+    </div>
+
+    {% if requests %}
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата</th>
+                <th>Мастер</th>
+                <th>Улица (название / код)</th>
+                <th>Первый павильон</th>
+                <th>Статус</th>
+                <th class="admin-table-actions-col">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for req in requests %}
+                <tr>
+                    <td>#{{ req.id }}</td>
+                    <td>
+                        {{ req.created_at.strftime("%d.%m.%Y %H:%M") if req.created_at }}
+                    </td>
+                    <td>{{ req.user.username }}</td>
+                    <td>
+                        <div class="admin-table-main">{{ req.street_name }}</div>
+                        <div class="admin-table-sub">код: {{ req.street_code }}</div>
+                    </td>
+                    <td>{{ req.pavilion_title }}</td>
+                    <td>
+                        {% if req.status == "pending" %}
+                            <span class="admin-status admin-status-pending">pending</span>
+                        {% elif req.status == "approved" %}
+                            <span class="admin-status admin-status-approved">approved</span>
+                        {% elif req.status == "rejected" %}
+                            <span class="admin-status admin-status-rejected">rejected</span>
+                        {% endif %}
+                    </td>
+                    <td class="admin-table-actions">
+                        {% if req.status == "pending" %}
+                            <form method="post"
+                                  action="{{ url_for('approve_request', req_id=req.id) }}">
+                                <button type="submit"
+                                        class="btn btn-small btn-success">
+                                    Одобрить
+                                </button>
+                            </form>
+                            <form method="post"
+                                  action="{{ url_for('reject_request', req_id=req.id) }}">
+                                <button type="submit"
+                                        class="btn btn-small btn-outline-danger">
+                                    Отклонить
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="admin-table-sub">Заявка обработана</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="admin-empty">
+            <h3>Заявок пока нет.</h3>
+            <p>Как только мастера начнут просить новые улицы, они появятся здесь.</p>
+        </div>
+    {% endif %}
+</section>
+
+<style>
+    .admin-page-header {
+        margin-bottom: 16px;
+    }
+    .admin-page-title {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+    .admin-page-subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .admin-tabs {
+        display: inline-flex;
+        gap: 6px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.8);
+        box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+        margin-bottom: 20px;
+    }
+    .admin-tab {
+        padding: 7px 16px;
+        border-radius: 999px;
+        font-size: 14px;
+        text-decoration: none;
+        color: #4b5563;
+        transition: background .2s, color .2s;
+    }
+    .admin-tab-active {
+        background: linear-gradient(135deg,#f97316,#ec4899);
+        color: #fff;
+        font-weight: 600;
+    }
+    .admin-tab:not(.admin-tab-active):hover {
+        background: rgba(148,163,184,0.16);
+        color: #111827;
+    }
+
+    .admin-section {
+        background: rgba(255,255,255,0.9);
+        border-radius: 24px;
+        padding: 20px 22px 22px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+    }
+    .admin-section-title {
+        margin: 0 0 6px;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .admin-section-text {
+        margin: 0 0 14px;
+        font-size: 14px;
+        color: #6b7280;
+        max-width: 700px;
+    }
+
+    .admin-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .admin-stat-card {
+        border-radius: 18px;
+        padding: 10px 12px;
+        background: #f9fafb;
+        border: 1px solid rgba(148,163,184,0.25);
+    }
+    .admin-stat-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #9ca3af;
+        margin-bottom: 4px;
+    }
+    .admin-stat-value {
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .admin-table-wrapper {
+        overflow-x: auto;
+        border-radius: 18px;
+        border: 1px solid rgba(148,163,184,0.25);
+        background: #fff;
+    }
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .admin-table th,
+    .admin-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: top;
+    }
+    .admin-table thead {
+        background: #f9fafb;
+    }
+    .admin-table-main {
+        font-weight: 600;
+    }
+    .admin-table-sub {
+        font-size: 12px;
+        color: #6b7280;
+    }
+    .admin-table-actions-col {
+        width: 190px;
+    }
+    .admin-table-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .admin-status {
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+    .admin-status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .admin-status-approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .admin-status-rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .btn-small {
+        padding: 4px 10px;
+        font-size: 12px;
+        border-radius: 999px;
+    }
+    .btn-success {
+        background: #22c55e;
+        border: none;
+        color: #fff;
+    }
+    .btn-success:hover {
+        background: #16a34a;
+    }
+
+    .admin-empty {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #f9fafb;
+        border: 1px dashed #d1d5db;
+        font-size: 14px;
+    }
+    .admin-empty h3 {
+        margin: 0 0 4px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .admin-empty p {
+        margin: 0;
+        color: #6b7280;
+    }
+
+    @media (max-width: 900px) {
+        .admin-stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+{% endblock %}

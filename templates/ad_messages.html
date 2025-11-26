@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Сообщения по объявлениям{% endblock %}
+
+{% block content %}
+<style>
+    .msgs-wrapper {
+        min-height: calc(100vh - 140px);
+        padding: 30px 20px 60px;
+        background:
+            radial-gradient(circle at 0 0, #ffe0ff 0, transparent 55%),
+            radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
+        display: flex;
+        justify-content: center;
+    }
+    .msgs-card {
+        max-width: 880px;
+        width: 100%;
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+        padding: 22px 24px 20px;
+    }
+    .msgs-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+    .msgs-sub {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 16px;
+    }
+    .msgs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 8px;
+    }
+    .msgs-item {
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: #f9fafb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    .msgs-item-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+    .msgs-item-sub {
+        font-size: 13px;
+        color: #6b7280;
+    }
+    .msgs-empty {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+    .msgs-item-actions a {
+        font-size: 13px;
+    }
+</style>
+
+<div class="msgs-wrapper">
+    <div class="msgs-card">
+        <div class="msgs-title">Сообщения по объявлениям</div>
+        <div class="msgs-sub">
+            Здесь будут чаты по твоим объявлениям. Пока для простоты показываем список
+            объявлений с переходом в чат.
+        </div>
+
+        {% if ads %}
+            <div class="msgs-list">
+                {% for ad in ads %}
+                    <div class="msgs-item">
+                        <div>
+                            <div class="msgs-item-title">{{ ad.title }}</div>
+                            <div class="msgs-item-sub">
+                                Павильон: {{ ad.pavilion_id }} • объявление №{{ ad.id }}
+                            </div>
+                        </div>
+                        <div class="msgs-item-actions">
+                            <a href="{{ url_for('ad_chat', ad_id=ad.id) }}"
+                               class="btn btn-outline">
+                                Открыть чат
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="msgs-empty">
+                Пока у тебя нет объявлений, привязанных к аккаунту мастера.<br>
+                Как только появятся — здесь будет список и переходы в чаты.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

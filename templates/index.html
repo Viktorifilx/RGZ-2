@@ -3,64 +3,54 @@
 {% block title %}Цифровая ярмарка мастеров{% endblock %}
 
 {% block content %}
+{% set visible_streets = streets %}
+
 <div class="index-hero">
     <div class="index-hero-main">
         <span class="index-hero-badge">онлайн-пространство помощи и творчества</span>
+
         <h1 class="index-hero-title">
             Найди своего мастера<br>
             <span>на цифровой ярмарке</span>
         </h1>
+
+        {# новая строка про доску объявлений #}
+        <div class="index-hero-board-tag">
+            &nbsp;доска объявлений&nbsp;★ задачи, проекты и помощь
+        </div>
+
         <p class="index-hero-text">
-            На каждой улице — свои мастера: программисты, дизайнеры, репетиторы и творцы.
+            На каждой улице — своя мини-доска объявлений: программисты, дизайнеры, репетиторы и творцы.
             Загляни в домик-павильон и посмотри, кто готов помочь сегодня.
         </p>
+
         <div class="index-hero-actions">
             <a href="#streets" class="btn btn-primary">Перейти к улицам</a>
-            <button class="btn btn-outline" type="button">
+            <a href="{{ url_for('how_it_works') }}" class="btn btn-outline">
                 Как работает ярмарка?
-            </button>
-        </div>
-        <div class="index-hero-meta">
-            <div class="meta-chip">
-                <span class="meta-label">Улиц</span>
-                <span class="meta-value">{{ streets|length }}</span>
-            </div>
-            <div class="meta-chip">
-                <span class="meta-label">Павильонов</span>
-                <span class="meta-value">
-                    {{ streets|map(attribute='ads')|map('length')|sum }}
-                </span>
-            </div>
-            <div class="meta-chip">
-                <span class="meta-label">Формат</span>
-                <span class="meta-value">учёба • код • креатив</span>
-            </div>
+            </a>
         </div>
     </div>
 
     <div class="index-hero-illustration">
         <div class="index-hero-card">
             <div class="index-hero-card-header">
-                <span class="pill pill-light">Пример павильона</span>
+                <span class="pill pill-light">Цифровое настроение</span>
             </div>
             <div class="index-hero-card-body">
-                <div class="index-hero-avatar">PY</div>
+                <div class="index-hero-avatar">FM</div>
                 <div>
-                    <div class="index-hero-card-title">Помощь с Python и SQL</div>
+                    <div class="index-hero-card-title">Город, где помогают по-своему</div>
                     <div class="index-hero-card-subtitle">
-                        Быстрый разбор лабораторных в удобном формате.
+                        Кому-то нужен разбор кода, кому-то — красивая презентация, а кто-то ищет поддержку
+                        перед зачётом. Ярмарка собирает таких людей в одном цифровом месте — остаётся
+                        только выбрать улицу и заглянуть в домик-павильон.
                     </div>
                 </div>
             </div>
             <div class="index-hero-card-footer">
-                Мастер: условный Иван • 1–2 встречи
+                Учёба, код и креатив — всё рядом, на расстоянии одного клика по нужной улице.
             </div>
-        </div>
-        <div class="index-hero-bubbles">
-            <span>IT</span>
-            <span>дизайн</span>
-            <span>учёба</span>
-            <span>фото</span>
         </div>
     </div>
 </div>
@@ -77,7 +67,7 @@
     <div class="index-streets-bg-orbit orbit-2"></div>
 
     <div class="index-street-grid">
-        {% for street in streets %}
+        {% for street in visible_streets %}
             <a href="{{ url_for('street_page', code=street.code) }}" class="index-street-card">
                 <div class="index-street-card-inner">
                     <div class="index-street-tag">
@@ -89,8 +79,24 @@
                             Учёба & репетиторство
                         {% elif street.code == 'photo' %}
                             Фото & креатив
+                        {% elif street.code == 'cyber' %}
+                            Киберпространство & сети
+                        {% elif street.code == 'automation' %}
+                            Python & автоматизация
+                        {% elif street.code == 'algos' %}
+                            Алгоритмы & структуры данных
+                        {% elif street.code == 'frontend' %}
+                            Фронтенд & вёрстка
+                        {% elif street.code == 'uiux' %}
+                            Интерфейсы & UX
+                        {% elif street.code == 'pixel' %}
+                            Цифровой арт & пиксели
+                        {% elif street.code == 'inspire' %}
+                            Проспект вдохновения
+                        {% elif street.code == 'cheats' %}
+                            Цифровая грамотность
                         {% else %}
-                            Улица №{{ loop.index }}
+                            Пространство мастеров
                         {% endif %}
                     </div>
 
@@ -105,17 +111,30 @@
                             Конспекты, подготовка к зачётам и экзаменам, объяснение теории.
                         {% elif street.code == 'photo' %}
                             Фотосессии, обработка, оформление аватарок и портфолио.
+                        {% elif street.code == 'cyber' %}
+                            Всё про сети, базовую кибербезопасность и настройки железа.
+                        {% elif street.code == 'automation' %}
+                            Задачи по автоматизации, скриптам и ботам для учёбы и рутины.
+                        {% elif street.code == 'algos' %}
+                            Подготовка по алгоритмам и структурам данных для учёбы и собесов.
+                        {% elif street.code == 'frontend' %}
+                            HTML, CSS, JS, адаптивная вёрстка и современный фронтенд.
+                        {% elif street.code == 'uiux' %}
+                            Интерфейсы, UX, прототипы и улучшение удобства сайтов.
+                        {% elif street.code == 'pixel' %}
+                            Пиксель-арт, иллюстрации, стилизация и визуальные фишки.
+                        {% elif street.code == 'inspire' %}
+                            Мозговые штурмы, сценарии, идеи проектов и креативные форматы.
+                        {% elif street.code == 'cheats' %}
+                            Мир онлайн-жизни: соцсети, приватность, цифровой след и грамотное поведение в интернете.
                         {% else %}
-                            Пространство мастеров этой улицы.
+                            Пространство для любых цифровых мастерских и новых идей.
                         {% endif %}
                     </p>
 
                     <div class="index-street-footer">
-                        <span class="index-street-stat">
-                            Павильонов: {{ street.ads|length }}
-                        </span>
                         <span class="index-street-link">
-                            Перейти на улицу →
+                            Перейти на улицу → 
                         </span>
                     </div>
                 </div>
@@ -123,4 +142,164 @@
         {% endfor %}
     </div>
 </section>
+
+{# Блок заявки только для мастеров и админа #}
+{% if session.get('user_role') in ['master', 'admin'] %}
+<section class="index-request">
+    <div class="index-request-inner">
+        <div class="index-request-text">
+            <div class="index-request-kicker">Новая идея?</div>
+            <h2>Не нашли улицу под свою тему?</h2>
+            <p>
+                Если существующие улицы не подходят под твой формат помощи или проекта,
+                можно запросить создание новой. Придумай название, короткий код и первый
+                павильон — цифровой город расширится ещё на один квартал.
+            </p>
+            <ul class="index-request-list">
+                <li>1 шаг — придумываешь название и код улицы;</li>
+                <li>2 шаг — описываешь первый павильон и чем он занимается;</li>
+                <li>3 шаг — сразу попадаешь на свою новую улицу с готовым домиком.</li>
+            </ul>
+            <a href="{{ url_for('request_street') }}" class="btn btn-outline index-request-btn">
+                Запросить новую улицу
+            </a>
+        </div>
+
+        <div class="index-request-card">
+            <div class="index-request-card-inner">
+                <div class="index-request-pill">мини-пример</div>
+                <h3>Улица «Клуб проектов»</h3>
+                <p>
+                    Представь улицу, где собираются команды для хакатонов, курсовых и
+                    творческих штук. Первый павильон — «Ищу команду на pet-проект», дальше
+                    появляются новые домики и объявления.
+                </p>
+                <div class="index-request-tags">
+                    <span>#новая_улица</span>
+                    <span>#павильон_мечты</span>
+                    <span>#свои_правила</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<style>
+    /* красивая строка про доску объявлений под заголовком */
+    .index-hero-board-tag {
+        display: inline-flex;
+        align-items: center;
+        margin: 8px 0 10px;
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(0,0,0,0.03);
+        background-image: linear-gradient(90deg,#ff4fd8,#ff9a3c);
+        -webkit-background-clip: text;
+        color: transparent;
+        white-space: nowrap;
+    }
+
+    .index-request {
+        margin-top: 48px;
+        padding: 32px 0 40px;
+        border-top: 1px solid rgba(15,23,42,0.06);
+    }
+    .index-request-inner {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2.2fr);
+        gap: 28px;
+        align-items: stretch;
+    }
+    .index-request-kicker {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        color: #888;
+        margin-bottom: 6px;
+    }
+    .index-request-text h2 {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    .index-request-text p {
+        font-size: 14px;
+        color: #555;
+        max-width: 540px;
+        margin-bottom: 10px;
+    }
+    .index-request-list {
+        margin: 0 0 14px 18px;
+        padding: 0;
+        font-size: 13px;
+        color: #555;
+    }
+    .index-request-list li {
+        margin-bottom: 3px;
+    }
+    .index-request-btn {
+        margin-top: 4px;
+    }
+    .index-request-card {
+        position: relative;
+        padding: 2px;
+        border-radius: 22px;
+        background: conic-gradient(from 210deg,
+                    rgba(255,79,216,0.3),
+                    rgba(99,102,241,0.3),
+                    rgba(249,115,22,0.35),
+                    rgba(255,79,216,0.3));
+        box-shadow: 0 14px 30px rgba(15,23,42,0.16);
+    }
+    .index-request-card-inner {
+        border-radius: 20px;
+        padding: 16px 18px 14px;
+        background: rgba(255,255,255,0.96);
+        height: 100%;
+    }
+    .index-request-pill {
+        display: inline-block;
+        font-size: 11px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: rgba(248,250,252,0.9);
+        margin-bottom: 6px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+    .index-request-card-inner h3 {
+        font-size: 17px;
+        margin-bottom: 6px;
+    }
+    .index-request-card-inner p {
+        font-size: 13px;
+        color: #4b5563;
+        margin-bottom: 10px;
+    }
+    .index-request-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 11px;
+        color: #6b21a8;
+    }
+    .index-request-tags span {
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: rgba(238,242,255,0.9);
+    }
+    @media (max-width: 880px) {
+        .index-request-inner {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}

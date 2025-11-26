@@ -4,55 +4,73 @@
     <meta charset="utf-8">
     <title>{% block title %}🎪 Ярмарка мастеров{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
-    <header class="site-header">
-        <div class="logo">
-            🎪 <span>FairMarket</span>
-        </div>
-        <nav class="main-nav">
-            <a href="{{ url_for('index') }}">Главная</a>
-            <a href="#">Улицы</a>
-            <a href="#">О ярмарке</a>
-        </nav>
-        <div class="auth-block">
-            <button class="btn btn-outline">Войти</button>
-            <button class="btn btn-primary">Регистрация</button>
-        </div>
-    </header>
+<header class="site-header">
+    <div class="logo">
+        🎪 <span>FairMarket</span>
+    </div>
 
-    <main class="page-content">
-        {% block content %}{% endblock %}
-    </main>
+    <nav class="main-nav">
+        <a href="{{ url_for('index') }}">Главная</a>
+        <a href="{{ url_for('index') }}#streets">Улицы</a>
+        <a href="{{ url_for('about') }}">О ярмарке</a>
+        <a href="{{ url_for('support') }}">Поддержка</a>
 
-    <footer class="site-footer">
-        <div class="footer-inner">
-            <span>Разработчик: {{ fio }}</span>
-            <span>Группа: {{ group }}</span>
-            <span>Проект: "Цифровая ярмарка мастеров"</span>
-        </div>
-    </footer>
+        {# Ссылка "Сообщения" только для мастера — ВАЖНО: используем ad_messages #}
+        {% if session.get('user_role') == 'master' %}
+            <a href="{{ url_for('ad_messages') }}">Сообщения</a>
+        {% endif %}
+    </nav>
 
-    <script>
-        // Простая анимация для палаток при скролле
-        document.addEventListener('DOMContentLoaded', function() {
-            const tents = document.querySelectorAll('.tent');
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.animationPlayState = 'running';
-                    }
-                });
-            }, { threshold: 0.1 });
+    <!-- Блок авторизации / пользователя -->
+    <div class="auth-block header-auth">
+        {% if session.get('user_id') %}
+            <span class="user-chip">
+                <span class="user-avatar">
+                    {{ session.get('username', '?')[0] | upper }}
+                </span>
+                <span class="user-name">
+                    {{ session.get('username', 'Гость') }}
+                    {% if session.get('user_role') == 'master' %}
+                        · мастер
+                    {% elif session.get('user_role') == 'admin' %}
+                        · админ
+                    {% endif %}
+                </span>
+            </span>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                Выйти
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline">
+                Войти
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary">
+                Регистрация
+            </a>
+        {% endif %}
+    </div>
+</header>
 
-            tents.forEach(tent => {
-                observer.observe(tent);
-            });
-        });
-    </script>
+<main class="page-content">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <span>Разработчик: {{ fio }}</span>
+        <span>Группа: {{ group }}</span>
+        <span>Проект: "Цифровая ярмарка мастеров"</span>
+    </div>
+</footer>
+
+<script>
+    // место для скриптов, если понадобится
+</script>
 </body>
 </html>

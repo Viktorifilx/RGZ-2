@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — Цифровая ярмарка{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('index') }}" class="auth-back">← На главную</a>
+
+<style>
+    .auth-back {
+        display: inline-block;
+        margin: 20px 0 10px 20px;
+        font-size: 15px;
+        color: #555;
+        text-decoration: none;
+        font-weight: 500;
+        transition: .2s;
+    }
+
+    .auth-back:hover {
+        color: #000;
+        transform: translateX(-3px);
+    }
+
+    .auth-wrapper {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px 60px;
+        background: radial-gradient(circle at 0 0, #ffe0ff 0, transparent 55%),
+                    radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
+    }
+
+    .auth-card {
+        position: relative;
+        background: #ffffff;
+        padding: 34px 32px 30px;
+        border-radius: 26px;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .auth-card::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at 0 100%, rgba(255,111,207,0.15), transparent 50%),
+                    radial-gradient(circle at 100% 0, rgba(92,151,255,0.18), transparent 50%);
+        opacity: 0.7;
+        z-index: -1;
+    }
+
+    .auth-title {
+        font-size: 30px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        text-align: left;
+    }
+
+    .auth-subtitle {
+        color: #555;
+        margin-bottom: 22px;
+        line-height: 1.5;
+    }
+
+    .auth-highlight {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(255, 111, 207, 0.08);
+        color: #ff4fd8;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        margin-bottom: 10px;
+    }
+
+    .auth-highlight-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: #ff4fd8;
+    }
+
+    .auth-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+        gap: 20px;
+    }
+
+    @media (max-width: 820px) {
+        .auth-layout {
+            grid-template-columns: 1fr;
+        }
+        .auth-card {
+            padding: 26px 22px 24px;
+        }
+    }
+
+    /* --- выбор роли --- */
+
+    .role-select {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .role-option {
+        display: block;
+    }
+
+    .role-option input {
+        display: none;
+    }
+
+    .role-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 12px;
+        border-radius: 18px;
+        border: 2px solid #e3e3e3;
+        background: rgba(255,255,255,0.9);
+        cursor: pointer;
+        transition: border-color .22s ease, box-shadow .22s ease, transform .18s ease, background .22s;
+    }
+
+    .role-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        background: linear-gradient(135deg, #ff9de6, #ffd2a0);
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .role-title {
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 2px;
+    }
+
+    .role-desc {
+        font-size: 13px;
+        color: #555;
+        line-height: 1.4;
+    }
+
+    .role-option input:checked + .role-box {
+        border-color: #ff4fd8;
+        background: linear-gradient(135deg, #fff6ff, #fdf1ff);
+        box-shadow: 0 10px 26px rgba(255, 79, 216, 0.18);
+        transform: translateY(-2px);
+    }
+
+    /* --- форма --- */
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 4px;
+    }
+
+    .auth-input {
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s, background .2s;
+        background: rgba(255,255,255,0.9);
+    }
+
+    .auth-input:focus {
+        border-color: #ff4fd8;
+        box-shadow: 0 0 0 2px rgba(255,79,216,0.16);
+        background: #fff;
+    }
+
+    .auth-btn {
+        margin-top: 6px;
+        width: 100%;
+        padding: 13px 0;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .auth-alt {
+        margin-top: 14px;
+        font-size: 13px;
+        text-align: center;
+        color: #555;
+    }
+
+    .auth-alt a {
+        color: #ff4fd8;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .auth-alt a:hover {
+        text-decoration: underline;
+    }
+
+    /* --- правая колонка с «историей» --- */
+
+    .auth-story {
+        padding: 12px 14px;
+        border-radius: 20px;
+        background: linear-gradient(145deg, #fff7ff, #f3fbff);
+        border: 1px dashed rgba(0,0,0,0.06);
+        font-size: 13px;
+        line-height: 1.5;
+        color: #444;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-story::before {
+        content: "FM";
+        position: absolute;
+        right: -20px;
+        bottom: -6px;
+        font-size: 56px;
+        font-weight: 800;
+        color: rgba(255,79,216,0.08);
+    }
+
+    .auth-story-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .auth-story-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .auth-story-pill span {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ff4fd8, #ffb45b);
+    }
+
+    .auth-role-hint {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+    }
+
+    .auth-role-hint b {
+        color: #ff4fd8;
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-highlight">
+            <span class="auth-highlight-dot"></span>
+            новый житель ярмарки
+        </div>
+        <h1 class="auth-title">Стань частью цифровой ярмарки</h1>
+        <p class="auth-subtitle">
+            Создай аккаунт, выбери свою роль и находи людей, с которыми удобно учиться, кодить и творить.
+        </p>
+
+        <div class="auth-layout">
+            <!-- левая часть: роль + форма -->
+            <div>
+                <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+                    <div class="role-select" id="role-select">
+                        <label class="role-option">
+                            <input type="radio" name="role" value="master" checked>
+                            <div class="role-box">
+                                <div class="role-icon">🎨</div>
+                                <div>
+                                    <div class="role-title">Я мастер</div>
+                                    <div class="role-desc">
+                                        Готов(а) делиться опытом, вести созвоны, помогать с кодом,
+                                        дизайном, учебой и проектами.
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="role-option">
+                            <input type="radio" name="role" value="user">
+                            <div class="role-box">
+                                <div class="role-icon">🌟</div>
+                                <div>
+                                    <div class="role-title">Я ищу помощь</div>
+                                    <div class="role-desc">
+                                        Хочу находить мастеров, просматривать объявления и собирать
+                                        свою команду поддержки.
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <input class="auth-input" type="text" name="username" placeholder="Никнейм (логин)" required>
+                    <input class="auth-input" type="email" name="email" placeholder="Email" required>
+                    <input class="auth-input" type="password" name="password" placeholder="Пароль" required>
+
+                    <button type="submit" class="btn btn-primary auth-btn">
+                        Создать аккаунт
+                    </button>
+                </form>
+
+                <p class="auth-alt">
+                    Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a>
+                </p>
+            </div>
+
+            <!-- правая часть: история/подсказка -->
+            <div class="auth-story">
+                <div class="auth-story-pill">
+                    <span></span>
+                    <div>Учёба • код • креатив</div>
+                </div>
+                <div class="auth-story-title">Город, где помогают по-своему</div>
+                <p>
+                    Кому-то нужен разбор кода, кому-то — аккуратная презентация, а кто-то ищет поддержку
+                    перед экзаменом. Всё это собирается в одном цифровом месте — на ярмарке мастеров.
+                </p>
+                <p class="auth-role-hint" id="auth-role-hint">
+                    Сейчас выбран режим <b>«Я мастер»</b> — после регистрации ты сможешь
+                    размещать объявления в павильонах.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const radios = document.querySelectorAll("#role-select input[name='role']");
+        const hint = document.getElementById("auth-role-hint");
+
+        function updateHint() {
+            const value = document.querySelector("#role-select input[name='role']:checked").value;
+            if (value === "master") {
+                hint.innerHTML = 'Сейчас выбран режим <b>«Я мастер»</b> — после регистрации ты сможешь размещать объявления и помогать другим.';
+            } else {
+                hint.innerHTML = 'Сейчас выбран режим <b>«Я ищу помощь»</b> — ты сможешь сохранять интересные объявления и находить мастеров под свои задачи.';
+            }
+        }
+
+        radios.forEach(r => r.addEventListener("change", updateHint));
+        updateHint();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Admin панель FairMarket{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Небольшой CSS именно для админ-шапки, чтобы всё выглядело аккуратно -->
+    <style>
+        .admin-body {
+            background: radial-gradient(circle at 0 0, #fff7ed 0, transparent 55%),
+                        radial-gradient(circle at 100% 100%, #eef2ff 0, transparent 55%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 36px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .admin-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .admin-logo-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            background: linear-gradient(135deg, #f97316, #fb7185);
+            color: #fff;
+            box-shadow: 0 6px 12px rgba(249,115,22,0.35);
+        }
+
+        .admin-logo-text b {
+            font-weight: 800;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 18px;
+            font-size: 14px;
+        }
+
+        .admin-nav-link {
+            text-decoration: none;
+            color: #4b5563;
+            padding: 6px 10px;
+            border-radius: 999px;
+            transition: background .2s, color .2s, box-shadow .2s;
+        }
+
+        .admin-nav-link:hover {
+            background: rgba(129,140,248,0.08);
+            color: #111827;
+            box-shadow: 0 4px 10px rgba(148,163,184,0.35);
+        }
+
+        .admin-header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 13px;
+        }
+
+        .admin-user-name {
+            font-weight: 700;
+        }
+
+        .admin-logout-btn {
+            padding: 7px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 26px 40px 32px;
+        }
+    </style>
+</head>
+<body class="admin-body">
+<header class="admin-header">
+    <div class="admin-header-left">
+        <span class="admin-logo-icon">⚙</span>
+        <span class="admin-logo-text">
+            <b>Admin</b> панель FairMarket
+        </span>
+    </div>
+
+    <nav class="admin-nav">
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-link">Обзор</a>
+
+        {# 👉 теперь по "Заявки" открывается страница заявок на объявления #}
+        <a href="{{ url_for('admin_ad_requests') }}" class="admin-nav-link">Заявки</a>
+
+        <a href="{{ url_for('admin_support') }}" class="admin-nav-link">Поддержка</a>
+        <a href="{{ url_for('index') }}" class="admin-nav-link">На сайт</a>
+    </nav>
+
+    <div class="admin-header-right">
+        <span class="admin-user">
+            Администратор · <span class="admin-user-name">ADMIN</span>
+        </span>
+        <a href="{{ url_for('logout') }}" class="btn btn-primary admin-logout-btn">
+            Выйти
+        </a>
+    </div>
+</header>
+
+<main class="admin-main">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <span>Разработчик: {{ fio }}</span>
+        <span>Группа: {{ group }}</span>
+        <span>Проект: "Цифровая ярмарка мастеров"</span>
+    </div>
+</footer>
+</body>
+</html>

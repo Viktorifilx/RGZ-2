@@ -1,0 +1,307 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Сообщения в поддержку{% endblock %}
+
+{% block content %}
+<section class="admin-section">
+    <header class="admin-section-header">
+        <h1>Сообщения в поддержку</h1>
+        <p>
+            Пользователи делятся проблемами и идеями. Отмечай обработанные сообщения,
+            чтобы не потеряться.
+        </p>
+    </header>
+
+    <!-- Статистика -->
+    <div class="admin-stats-row">
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Всего</div>
+            <div class="admin-stat-value">{{ stats.total }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Новые</div>
+            <div class="admin-stat-value">{{ stats.new }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Обработано</div>
+            <div class="admin-stat-value">{{ stats.done }}</div>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="support-list">
+            {% for m in messages %}
+            <article class="support-item-card">
+                <div class="support-item-main">
+                    <div class="support-item-header">
+                        <div class="support-item-title">
+                            {{ m.subject or "Без темы" }}
+                        </div>
+                        <div class="support-item-meta">
+                            От:
+                            {{ m.user.username }}
+                            ({{ m.user.email }})
+                            · {{ m.created_at.strftime("%d.%m.%Y %H:%M") }}
+                        </div>
+                    </div>
+
+                    <p class="support-item-text">
+                        {{ m.text }}
+                    </p>
+
+                    {% if m.admin_reply %}
+                        <div class="support-item-reply">
+                            <div class="support-item-reply-label">
+                                Ответ администратора:
+                            </div>
+                            <p>{{ m.admin_reply }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="support-item-side">
+                    <div class="support-status-pill
+                        {% if m.status == 'new' %}status-new
+                        {% elif m.status == 'done' %}status-done
+                        {% endif %}">
+                        {% if m.status == 'new' %}Новое{% else %}Обработано{% endif %}
+                    </div>
+
+                    <div class="support-item-actions">
+                        <!-- Кнопка ОТВЕТИТЬ -->
+                        <button type="button"
+                                class="btn btn-outline admin-reply-btn"
+                                data-id="{{ m.id }}"
+                                data-user="{{ m.user.username }}"
+                                data-subject="{{ m.subject or '' }}">
+                            Ответить
+                        </button>
+
+                        <!-- Кнопка ПОМЕТИТЬ КАК ОБРАБОТАННОЕ -->
+                        {% if m.status != 'done' %}
+                        <form method="post"
+                              action="{{ url_for('close_support', msg_id=m.id) }}">
+                            <button type="submit"
+                                    class="btn btn-success support-done-btn">
+                                Пометить как обработанное
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Сообщений пока нет.</p>
+    {% endif %}
+</section>
+
+<!-- Модальное окно ответа -->
+<div class="admin-modal" id="reply-modal">
+    <div class="admin-modal-backdrop" id="reply-backdrop"></div>
+    <div class="admin-modal-window">
+        <div class="admin-modal-header">
+            <h2 id="reply-modal-title">Ответ пользователю</h2>
+            <button type="button" class="admin-modal-close" id="reply-close">×</button>
+        </div>
+
+        <form id="reply-form" method="post">
+            <div class="admin-modal-body">
+                <div class="admin-modal-info" id="reply-info"></div>
+                <textarea name="reply_text"
+                          class="admin-modal-textarea"
+                          placeholder="Введите текст ответа"
+                          required></textarea>
+            </div>
+
+            <div class="admin-modal-footer">
+                <button type="submit" class="btn btn-primary">
+                    Отправить
+                </button>
+                <button type="button" class="btn btn-outline" id="reply-cancel">
+                    Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.support-list {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.support-item-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 14px 16px;
+    box-shadow: 0 12px 30px rgba(15,23,42,.06);
+}
+.support-item-main {
+    flex: 1 1 auto;
+}
+.support-item-header {
+    margin-bottom: 6px;
+}
+.support-item-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+.support-item-meta {
+    font-size: 12px;
+    color: #6b7280;
+}
+.support-item-text {
+    font-size: 14px;
+    margin: 6px 0 4px;
+}
+.support-item-reply {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f9fafb;
+    font-size: 13px;
+}
+.support-item-reply-label {
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+.support-item-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+.support-status-pill {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+.status-new {
+    background: #fef3c7;
+    color: #92400e;
+}
+.status-done {
+    background: #dcfce7;
+    color: #166534;
+}
+.support-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.support-done-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+/* Модалка */
+.admin-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+.admin-modal.open {
+    display: flex;
+}
+.admin-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15,23,42,.35);
+}
+.admin-modal-window {
+    position: relative;
+    background: #fff;
+    border-radius: 18px;
+    padding: 14px 16px 12px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 50px rgba(15,23,42,.4);
+    z-index: 51;
+}
+.admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.admin-modal-close {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+.admin-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.admin-modal-info {
+    font-size: 13px;
+    color: #6b7280;
+}
+.admin-modal-textarea {
+    width: 100%;
+    min-height: 120px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    font-size: 14px;
+    resize: vertical;
+}
+.admin-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal   = document.getElementById("reply-modal");
+    const backdrop = document.getElementById("reply-backdrop");
+    const closeBtn = document.getElementById("reply-close");
+    const cancelBtn = document.getElementById("reply-cancel");
+    const form    = document.getElementById("reply-form");
+    const infoBox = document.getElementById("reply-info");
+
+    // шаблон URL: /admin/support/reply/0 -> заменяем 0 на id
+    const baseAction = "{{ url_for('admin_support_reply', msg_id=0) }}";
+
+    function openModal(id, user, subject) {
+        form.action = baseAction.replace("0", id);
+        infoBox.textContent = `Пользователь: ${user} · Тема: ${subject || "Без темы"}`;
+        modal.classList.add("open");
+    }
+
+    function closeModal() {
+        modal.classList.remove("open");
+        form.reset();
+    }
+
+    document.querySelectorAll(".admin-reply-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+            const user = btn.dataset.user || "пользователь";
+            const subject = btn.dataset.subject || "";
+            openModal(id, user, subject);
+        });
+    });
+
+    [backdrop, closeBtn, cancelBtn].forEach(el => {
+        if (el) el.addEventListener("click", closeModal);
+    });
+});
+</script>
+{% endblock %}

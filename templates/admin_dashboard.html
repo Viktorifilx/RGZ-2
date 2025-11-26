@@ -1,0 +1,109 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Админ-панель — улицы и павильоны{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+    <div class="admin-page-header">
+        <h1>Улицы ярмарки</h1>
+        <p>
+            Здесь видно все улицы, доступные на сайте. Нажми на улицу, чтобы
+            открыть её павильоны и объявления так же, как это видят пользователи.
+        </p>
+    </div>
+
+    <section class="index-streets admin-streets">
+        <div class="index-streets-header">
+            <h2>Список улиц</h2>
+            <p>
+                Сейчас на ярмарке {{ streets|length }} ули{{ 'ца' if streets|length == 1
+                    else 'цы' if streets|length in [2,3,4] else 'ц' }}.
+            </p>
+        </div>
+
+        <div class="index-street-grid">
+            {% for street in streets %}
+                <a href="{{ url_for('street_page', code=street.code) }}" class="index-street-card">
+                    <div class="index-street-card-inner">
+                        <div class="index-street-tag">
+                            {% if street.code == 'it' %}
+                                IT & разработка
+                            {% elif street.code == 'design' %}
+                                Дизайн & визуал
+                            {% elif street.code == 'study' %}
+                                Учёба & репетиторство
+                            {% elif street.code == 'photo' %}
+                                Фото & креатив
+                            {% elif street.code == 'cyber' %}
+                                Киберпространство & сети
+                            {% elif street.code == 'automation' %}
+                                Python & автоматизация
+                            {% elif street.code == 'algos' %}
+                                Алгоритмы & структуры данных
+                            {% elif street.code == 'frontend' %}
+                                Фронтенд & вёрстка
+                            {% elif street.code == 'uiux' %}
+                                Интерфейсы & UX
+                            {% elif street.code == 'pixel' %}
+                                Цифровой арт & пиксели
+                            {% elif street.code == 'inspire' %}
+                                Проспект вдохновения
+                            {% elif street.code == 'cheats' %}
+                                Цифровая грамотность
+                            {% else %}
+                                Пространство мастеров
+                            {% endif %}
+                        </div>
+
+                        <h3 class="index-street-name">
+                            {{ street.name }}
+                        </h3>
+
+                        <p class="index-street-desc">
+                            Павильонов на улице: {{ street.pavilions|length }}.
+                            Нажми, чтобы посмотреть, какие мастерские сейчас открыты.
+                        </p>
+
+                        <div class="index-street-footer">
+                            <span class="index-street-link">
+                                Открыть улицу →
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+    .admin-page {
+        padding: 24px 32px 40px;
+    }
+
+    .admin-page-header h1 {
+        font-size: 26px;
+        margin-bottom: 4px;
+    }
+
+    .admin-page-header p {
+        font-size: 14px;
+        color: #555;
+        max-width: 640px;
+        margin-bottom: 18px;
+    }
+
+    /* небольшая адаптация сетки для админки */
+    .admin-streets {
+        padding-top: 0;
+    }
+
+    @media (max-width: 900px) {
+        .admin-page {
+            padding: 18px 16px 28px;
+        }
+    }
+</style>
+
+{% endblock %}

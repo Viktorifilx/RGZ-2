@@ -3,43 +3,267 @@
 {% block title %}{{ pavilion.title }} — {{ pavilion.street.name }}{% endblock %}
 
 {% block content %}
-<section class="ad-hero">
+<section class="pavilion-hero">
     <a href="{{ url_for('street_page', code=pavilion.street.code) }}" class="back-link">
         ← Вернуться на {{ pavilion.street.name }}
     </a>
 
-    <h1>{{ pavilion.title }}</h1>
-    {% if pavilion.description %}
-        <p>{{ pavilion.description }}</p>
-    {% else %}
-        <p>Объявления мастеров по теме этой улицы.</p>
-    {% endif %}
+    <div class="pavilion-hero-inner">
+        <div class="pavilion-hero-info">
+            <span class="pavilion-hero-chip">
+                Павильон на улице «{{ pavilion.street.name }}»
+            </span>
+            <h1 class="pavilion-hero-title">{{ pavilion.title }}</h1>
+
+            {% if session.get('user_role') == 'admin' %}
+            <div class="admin-pavilion-tools">
+                <span class="admin-pavilion-label">Админ: управление павильоном</span>
+
+                <form method="post" action="{{ url_for('admin_clear_pavilion', pavilion_id=pavilion.id) }}">
+                    <button type="submit" class="btn btn-outline btn-small">
+                        Очистить объявления
+                    </button>
+                </form>
+
+                <form method="post"
+                    action="{{ url_for('admin_delete_pavilion', pavilion_id=pavilion.id) }}"
+                    onsubmit="return confirm('Удалить павильон целиком? Все объявления тоже будут удалены.');">
+                    <button type="submit" class="btn btn-outline-danger btn-small">
+                        Удалить павильон
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+
+            <p class="pavilion-hero-subtitle">
+                {% if pavilion.description %}
+                    {{ pavilion.description }}
+                {% else %}
+                    Тематический павильон с объявлениями мастеров по этой теме.
+                {% endif %}
+            </p>
+
+            <div class="pavilion-hero-meta">
+                <span>Объявлений: {{ ads|length }}</span>
+                <span>Улица: {{ pavilion.street.name }}</span>
+            </div>
+        </div>
+
+        <div class="pavilion-hero-card-demo">
+            <div class="avatar-circle big">
+                {{
+                    ads[0].author_name[0]
+                    if ads and ads[0].author_name
+                    else pavilion.title[0]
+                }}
+            </div>
+            <div class="pavilion-hero-card-text">
+                <div class="pavilion-hero-card-title">
+                    {% if ads %}
+                        {{ ads[0].title }}
+                    {% else %}
+                        Здесь скоро появятся первые мастера ✨
+                    {% endif %}
+                </div>
+                <div class="pavilion-hero-card-subtitle">
+                    {% if ads %}
+                        Короткий пример объявления из этого павильона.
+                    {% else %}
+                        Как только появятся объявления, ты увидишь их здесь.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
-<section class="pavilion-ads-list">
+
+{% if session.get('user_role') in ['master', 'admin'] %}
+<div class="pavilion-offer-wrapper">
+    <a href="{{ url_for('offer_ad', pavilion_id=pavilion.id) }}"
+       class="btn btn-primary pavilion-offer-btn">
+        Предложить объявление
+    </a>
+</div>
+{% endif %}
+
+
+<section class="pavilion-ads-section">
     {% if ads %}
+        <h2 class="pavilion-ads-title">Объявления мастеров</h2>
+
         <div class="pavilion-ads-grid">
             {% for ad in ads %}
-                <a href="{{ url_for('ad_page', ad_id=ad.id) }}" class="pavilion-ad-card">
-                    <div class="pavilion-ad-card-inner">
-                        <div class="avatar-circle big">
-                            {{ ad.author_name[0] }}
-                        </div>
-                        <h2 class="pavilion-ad-title">{{ ad.title }}</h2>
-                        <p class="pavilion-ad-text">
-                            {{ ad.text }}
-                        </p>
-                        <div class="pavilion-ad-meta">
+    <div class="pavilion-ad-wrapper">
+
+        <!-- сама карточка объявления -->
+        <a href="{{ url_for('ad_page', ad_id=ad.id) }}" class="pavilion-ad-card">
+            <div class="pavilion-ad-card-inner">
+                <div class="pavilion-ad-header">
+                    <div class="avatar-circle">
+                        {{ ad.author_name[0] }}
+                    </div>
+                    <div>
+                        <h3 class="pavilion-ad-title">{{ ad.title }}</h3>
+                        <div class="pavilion-ad-author">
                             Мастер: {{ ad.author_name }}
                         </div>
                     </div>
-                </a>
-            {% endfor %}
+                </div>
+
+                <p class="pavilion-ad-text">
+                    {{ ad.text }}
+                </p>
+
+                <div class="pavilion-ad-footer">
+                    <span>Подробнее →</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- КНОПКА УДАЛЕНИЯ ТОЛЬКО ДЛЯ АДМИНА -->
+        {% if session.get('user_role') == 'admin' %}
+        <div class="ad-admin-delete-form">
+            <button type="button"
+                    class="ad-delete-btn js-open-delete-modal"
+                    data-ad-id="{{ ad.id }}">
+                Удалить объявление
+            </button>
+        </div>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
         </div>
     {% else %}
-        <p class="empty-street big">
-            Пока объявлений нет. Здесь скоро появятся мастера по этой теме.
-        </p>
+        <div class="pavilion-empty">
+            <h2>Пока здесь тихо 🤫</h2>
+            <p>В этом павильоне ещё нет объявлений. Скоро мастера сюда заселятся!</p>
+        </div>
     {% endif %}
 </section>
+
+<style>
+    .admin-pavilion-tools {
+        margin: 12px 0 18px;
+        padding: 8px 10px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.9);
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        font-size: 13px;
+        box-shadow: 0 8px 18px rgba(15,23,42,0.08);
+    }
+
+    .admin-pavilion-label {
+        font-weight: 600;
+        margin-right: 4px;
+    }
+
+    .admin-pavilion-tools form {
+        margin: 0;
+    }
+
+    .btn-small {
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 999px;
+    }
+
+    .btn-outline-danger {
+        border: 1px solid #ef4444;
+        color: #b91c1c;
+        background: #fff;
+    }
+
+    .btn-outline-danger:hover {
+        background: #fee2e2;
+    }
+
+    /* маленькая кнопка удаления у каждого объявления (если сделаешь ниже) */
+    .ad-admin-delete-form {
+        margin-top: 6px;
+        text-align: right;
+    }
+
+    .ad-delete-btn {
+        border: none;
+        background: transparent;
+        color: #ef4444;
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        padding: 0;
+    }
+
+    .ad-delete-btn:hover {
+        color: #b91c1c;
+    }
+
+    .pavilion-offer-wrapper {
+        max-width: 1040px;
+        margin: 0 auto 12px;
+        text-align: right;
+    }
+
+    .pavilion-offer-btn {
+        border-radius: 999px;
+        padding: 8px 18px;
+        font-size: 14px;
+    }
+
+
+</style>
+
+<!-- МОДАЛКА УДАЛЕНИЯ -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-window">
+        <h3>Удалить объявление?</h3>
+        <p>Это действие нельзя будет отменить.</p>
+
+        <div class="modal-actions">
+            <button class="modal-btn cancel-btn" id="modalCancel">Отмена</button>
+
+            <form id="modalDeleteForm" method="post">
+                <button type="submit" class="modal-btn delete-btn">
+                    Удалить
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("deleteModal");
+    const form = document.getElementById("modalDeleteForm");
+    const cancelBtn = document.getElementById("modalCancel");
+
+    // обработчик открытия модалки
+    document.querySelectorAll(".js-open-delete-modal").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const adId = btn.dataset.adId;
+            form.action = `/admin/delete-ad/${adId}`; 
+            modal.classList.add("open");
+        });
+    });
+
+    // закрыть модалку
+    cancelBtn.addEventListener("click", () => {
+        modal.classList.remove("open");
+    });
+
+    // закрытие по клику на фон
+    modal.addEventListener("click", e => {
+        if (e.target === modal) modal.classList.remove("open");
+    });
+});
+</script>
+
+
 {% endblock %}

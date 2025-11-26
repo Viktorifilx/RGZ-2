@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Сообщения по объявлениям{% endblock %}
+
+{% block content %}
+<div class="messages-wrapper">
+    <h1>Сообщения по объявлениям</h1>
+
+    {% if items %}
+        <ul class="messages-list">
+            {% for m, ad, sender in items %}
+                <li class="messages-item">
+                    <div class="messages-ad-title">
+                        Объявление: «{{ ad.title }}»
+                    </div>
+                    <div class="messages-meta">
+                        От: <b>{{ sender.username }}</b>
+                        · {{ m.created_at.strftime('%d.%m %H:%M') if m.created_at }}
+                    </div>
+                    <div class="messages-text">
+                        {{ m.text }}
+                    </div>
+                    <a href="{{ url_for('ad_chat', ad_id=ad.id) }}" class="messages-link">
+                        Открыть чат →
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Пока никто не написал по объявлениям.</p>
+    {% endif %}
+</div>
+{% endblock %}

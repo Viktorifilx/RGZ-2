@@ -1816,3 +1816,248 @@ body {
     }
 }
 
+/* ===== ПАВИЛЬОН ===== */
+
+.pavilion-hero {
+    padding: 32px 0 16px;
+    background: linear-gradient(135deg, #ffe9c9 0%, #ffeef8 50%, #e8f3ff 100%);
+    border-radius: 24px;
+    margin-bottom: 24px;
+}
+
+.pavilion-hero-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+    gap: 32px;
+    align-items: center;
+}
+
+.pavilion-hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pavilion-hero-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(255,255,255,0.7);
+    color: #ff4b8b;
+}
+
+.pavilion-hero-title {
+    font-size: 32px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.pavilion-hero-subtitle {
+    margin: 0;
+    font-size: 15px;
+    color: #555;
+}
+
+.pavilion-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #666;
+}
+
+.pavilion-hero-meta span {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.8);
+}
+
+/* демо-карточка справа */
+
+.pavilion-hero-card-demo {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.06);
+}
+
+.pavilion-hero-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pavilion-hero-card-title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.pavilion-hero-card-subtitle {
+    font-size: 13px;
+    color: #777;
+}
+
+/* список объявлений */
+
+.pavilion-ads-section {
+    margin-top: 16px;
+}
+
+.pavilion-ads-title {
+    font-size: 22px;
+    margin-bottom: 16px;
+}
+
+.pavilion-ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.pavilion-ad-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.pavilion-ad-card-inner {
+    height: 100%;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, translate 0.15s ease;
+}
+
+.pavilion-ad-card-inner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.08);
+}
+
+.pavilion-ad-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.pavilion-ad-title {
+    font-size: 16px;
+    margin: 0;
+}
+
+.pavilion-ad-author {
+    font-size: 13px;
+    color: #777;
+}
+
+.pavilion-ad-text {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+}
+
+.pavilion-ad-footer {
+    margin-top: auto;
+    font-size: 13px;
+    color: #ff4b8b;
+}
+
+/* пустой павильон */
+
+.pavilion-empty {
+    padding: 32px 24px;
+    border-radius: 20px;
+    background: #faf5ff;
+    text-align: center;
+}
+
+.pavilion-empty h2 {
+    margin-bottom: 8px;
+}
+
+/* затемнение фона */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* показываем модалку */
+.modal-overlay.open {
+    display: flex;
+}
+
+/* окно */
+.modal-window {
+    background: white;
+    padding: 26px 28px;
+    width: 340px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    animation: scaleIn .22s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(.92); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.modal-window h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.modal-window p {
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* кнопки */
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.modal-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+}
+
+.cancel-btn {
+    background: #eee;
+}
+
+.cancel-btn:hover {
+    background: #ddd;
+}
+
+.delete-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+}

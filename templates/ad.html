@@ -1,32 +1,189 @@
 {% extends "base.html" %}
 
-{% block title %}{{ ad.title }} — объявление мастера{% endblock %}
+{% block title %}Сообщения по объявлению — {{ ad.title }}{% endblock %}
 
 {% block content %}
-<section class="ad-hero">
-    <a href="{{ url_for('pavilion_page', pavilion_id=ad.pavilion.id) }}" class="back-link">
-        ← К павильону «{{ ad.pavilion.title }}»
-    </a>
+<style>
+    .chat-wrapper {
+        min-height: calc(100vh - 140px);
+        padding: 30px 20px 60px;
+        background:
+            radial-gradient(circle at 0 0, #ffe8ff 0, transparent 55%),
+            radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
 
-    <div class="ad-card-full">
-        <div class="ad-card-header">
-            <div class="avatar-circle big">
-                {{ ad.author_name[0] }}
-            </div>
-            <div>
-                <h1>{{ ad.title }}</h1>
-                <div class="ad-author-line">
-                    Мастер: {{ ad.author_name }}
-                </div>
-                <div class="ad-street-line">
-                    Улица: {{ ad.pavilion.street.name }} • Павильон: {{ ad.pavilion.title }}
-                </div>
+    .chat-card {
+        width: 100%;
+        max-width: 760px;
+        background: #ffffff;
+        border-radius: 26px;
+        padding: 22px 22px 18px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+    }
+
+    .chat-header {
+        margin-bottom: 14px;
+    }
+
+    .chat-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 4px 0 2px;
+    }
+
+    .chat-subtitle {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .chat-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: rgba(248,250,252,0.9);
+        margin-left: 6px;
+    }
+
+    .chat-box {
+        margin-top: 10px;
+        border-radius: 18px;
+        background: linear-gradient(180deg,#f9fafb,#eef2ff);
+        padding: 12px 10px;
+        max-height: 360px;
+        overflow-y: auto;
+    }
+
+    .chat-empty {
+        font-size: 13px;
+        color: #6b7280;
+        padding: 16px 10px;
+    }
+
+    .chat-message {
+        max-width: 80%;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.4;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+    }
+
+    .chat-message.me {
+        margin-left: auto;
+        background: linear-gradient(135deg,#ff4fd8,#ff9a3c);
+        color: #ffffff;
+    }
+
+    .chat-message-author {
+        font-weight: 600;
+        font-size: 12px;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .chat-message-time {
+        font-size: 11px;
+        opacity: .8;
+        margin-top: 2px;
+    }
+
+    .chat-form {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .chat-textarea {
+        flex: 1;
+        resize: vertical;
+        min-height: 70px;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        padding: 9px 11px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .chat-textarea:focus {
+        border-color: #ff4fd8;
+        box-shadow: 0 0 0 2px rgba(255,79,216,0.16);
+    }
+
+    .chat-send-btn {
+        white-space: nowrap;
+    }
+</style>
+
+<div class="chat-wrapper">
+    <div class="chat-card">
+        <div class="chat-header">
+            <a href="javascript:history.back()" class="auth-back" style="margin:0 0 6px 0;">
+                ← Вернуться к объявлению
+            </a>
+
+            <div class="chat-title">{{ ad.title }}</div>
+            <div class="chat-subtitle">
+                Мастер: {{ ad.author_name or 'Мастер' }}
+                <span class="chat-badge">чат по объявлению</span>
             </div>
         </div>
 
-        <div class="ad-card-body">
-            <p>{{ ad.text }}</p>
+        <div class="chat-box">
+            {% if messages and messages|length %}
+                {% for m in messages %}
+                    {% set is_mine = (m.sender_id == current_user_id) %}
+                    <div class="chat-message {% if is_mine %}me{% endif %}">
+                        <div class="chat-message-author">
+                            {% if is_mine %}
+                                Вы
+                            {% else %}
+                                {{ users_map.get(m.sender_id, 'Пользователь') }}
+                            {% endif %}
+                            {% if m.sender_id == master_id %}
+                                <span class="chat-badge">мастер</span>
+                            {% endif %}
+                        </div>
+                        <div class="chat-message-text">
+                            {{ m.text }}
+                        </div>
+                        {% if m.created_at %}
+                            <div class="chat-message-time">
+                                {{ m.created_at }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="chat-empty">
+                    Пока сообщений нет. Напиши мастеру первым — расскажи, с чем нужна помощь
+                    и когда тебе удобно работать с заданием.
+                </div>
+            {% endif %}
         </div>
+
+        {# ВАЖНО: отправляем форму именно на /ad/<id>/chat и поле называется message #}
+        <form method="post"
+              action="{{ url_for('ad_chat', ad_id=ad.id) }}"
+              class="chat-form">
+            <textarea name="message"
+                      class="chat-textarea"
+                      placeholder="Написать сообщение мастеру..."
+                      required></textarea>
+            <button type="submit" class="btn btn-primary chat-send-btn">
+                Отправить
+            </button>
+        </form>
     </div>
-</section>
+</div>
 {% endblock %}

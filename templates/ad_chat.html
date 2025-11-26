@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Сообщения по объявлению — {{ ad.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .ad-chat-wrapper {
+        min-height: calc(100vh - 140px);
+        padding: 30px 20px 60px;
+        background: radial-gradient(circle at 0 0, #ffe0ff 0, transparent 55%),
+                    radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
+        display: flex;
+        justify-content: center;
+    }
+    .ad-chat-card {
+        max-width: 820px;
+        width: 100%;
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+        padding: 22px 24px 20px;
+    }
+    .ad-chat-back {
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: #555;
+        text-decoration: none;
+        transition: .2s;
+    }
+    .ad-chat-back:hover {
+        color: #000;
+        transform: translateX(-3px);
+    }
+    .ad-chat-header-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+    .ad-chat-header-sub {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 16px;
+    }
+
+    .ad-chat-area {
+        border-radius: 18px;
+        background: #f9fafb;
+        padding: 14px 14px 10px;
+        margin-bottom: 14px;
+        max-height: 260px;
+        overflow-y: auto;
+        font-size: 14px;
+    }
+    .ad-chat-empty {
+        color: #6b7280;
+    }
+
+    .ad-chat-msg {
+        max-width: 80%;
+        padding: 8px 10px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+    }
+    .ad-chat-msg.me {
+        margin-left: auto;
+        background: linear-gradient(135deg,#ff4fd8,#ff9a3c);
+        color: #fff;
+    }
+    .ad-chat-msg-author {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .ad-chat-badge {
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: rgba(248,250,252,0.9);
+        color: #4b5563;
+    }
+    .ad-chat-msg-time {
+        font-size: 11px;
+        opacity: .8;
+        margin-top: 2px;
+    }
+
+    .ad-chat-form {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: flex-end;
+    }
+    .ad-chat-input {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid #ddd;
+        padding: 10px 12px;
+        font-size: 14px;
+        resize: vertical;
+        min-height: 70px;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s, background .2s;
+        background: rgba(255,255,255,0.95);
+    }
+    .ad-chat-input:focus {
+        border-color: #ff4fd8;
+        box-shadow: 0 0 0 2px rgba(255,79,216,0.16);
+        background: #fff;
+    }
+    .ad-chat-send {
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+    }
+
+    @media (max-width: 720px) {
+        .ad-chat-form {
+            grid-template-columns: 1fr;
+        }
+        .ad-chat-send {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="ad-chat-wrapper">
+    <div class="ad-chat-card">
+        {# безопасно: просто назад, чтобы не угадывать имя роута объявления #}
+        <a href="javascript:history.back()" class="ad-chat-back">
+            ← К объявлению «{{ ad.title }}»
+        </a>
+
+        <div class="ad-chat-header">
+            <div class="ad-chat-header-title">Сообщения по объявлению</div>
+            <div class="ad-chat-header-sub">
+                Мастер: <b>{{ ad.author_name or 'Мастер' }}</b>.  
+                Ты можешь отправить ему сообщение прямо с этой страницы.
+            </div>
+        </div>
+
+        <div class="ad-chat-area">
+            {% if messages and messages|length %}
+                {% for m in messages %}
+                    {% set is_mine = (m.sender_id == current_user_id) %}
+                    <div class="ad-chat-msg {% if is_mine %}me{% endif %}">
+                        <div class="ad-chat-msg-author">
+                            {% if is_mine %}
+                                Вы
+                            {% else %}
+                                {{ users_map.get(m.sender_id, 'Пользователь') }}
+                            {% endif %}
+                            {% if m.sender_id == master_id %}
+                                <span class="ad-chat-badge">мастер</span>
+                            {% endif %}
+                        </div>
+                        <div>{{ m.text }}</div>
+                        {% if m.created_at %}
+                            <div class="ad-chat-msg-time">
+                                {{ m.created_at }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="ad-chat-empty">
+                    Пока сообщений нет. Напиши мастеру первым — опиши задачу, сроки и удобный формат связи.
+                </div>
+            {% endif %}
+        </div>
+
+        <form class="ad-chat-form"
+              method="POST"
+              action="{{ url_for('ad_chat', ad_id=ad.id) }}">
+            <textarea name="message"
+                      class="ad-chat-input"
+                      placeholder="Напиши мастеру, чем тебе нужно помочь..."
+                      required></textarea>
+            <button type="submit" class="btn btn-primary ad-chat-send">
+                Отправить
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
