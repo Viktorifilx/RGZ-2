@@ -16,8 +16,19 @@
             </p>
         </div>
 
-        <div class="auth-card">
+                <div class="auth-card">
             <h2 class="auth-card-title">Войти в аккаунт</h2>
+
+            {# 🔔 Сообщения из flash (в т.ч. "Аккаунт успешно создан") #}
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="auth-success">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
             {% if errors %}
             <div class="auth-errors">
@@ -26,6 +37,7 @@
                 {% endfor %}
             </div>
             {% endif %}
+
 
             <form method="post" class="auth-form">
                 <label class="auth-label">
@@ -60,7 +72,7 @@
 </section>
 
 <style>
-/* стили такие же, как в register.html, можно не менять */
+/* стили такие же, как в register.html, плюс .auth-success */
 .auth-page {
     padding: 40px 20px 60px;
     background:
@@ -83,6 +95,16 @@
     margin-bottom: 10px;
     display: inline-flex;
 }
+
+.auth-success {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #166534;
+    background: #dcfce7;
+    border-radius: 14px;
+    padding: 8px 11px;
+}
+
 .auth-kicker {
     font-size: 11px;
     text-transform: uppercase;
@@ -117,6 +139,17 @@
     font-size: 13px;
     color: #b91c1c;
 }
+
+/* 👇 новый блок с успешным сообщением */
+.auth-success {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #166534;
+    background: #dcfce7;
+    border-radius: 14px;
+    padding: 8px 11px;
+}
+
 .auth-form {
     display: flex;
     flex-direction: column;

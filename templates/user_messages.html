@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Сообщения по объявлениям{% endblock %}
+{% block title %}Мои сообщения{% endblock %}
 
 {% block content %}
 <style>
@@ -13,7 +13,6 @@
         display: flex;
         justify-content: center;
     }
-
     .msgs-card {
         max-width: 880px;
         width: 100%;
@@ -22,26 +21,22 @@
         box-shadow: 0 18px 40px rgba(15,23,42,0.12);
         padding: 22px 24px 20px;
     }
-
     .msgs-title {
         font-size: 20px;
         font-weight: 800;
         margin-bottom: 6px;
     }
-
     .msgs-sub {
         font-size: 14px;
         color: #6b7280;
         margin-bottom: 16px;
     }
-
     .msgs-list {
         display: flex;
         flex-direction: column;
         gap: 10px;
         margin-top: 8px;
     }
-
     .msgs-item {
         border-radius: 16px;
         padding: 12px 14px;
@@ -51,28 +46,23 @@
         align-items: center;
         gap: 10px;
     }
-
     .msgs-item-title {
         font-weight: 600;
         font-size: 14px;
         margin-bottom: 2px;
     }
-
     .msgs-item-sub {
         font-size: 13px;
         color: #6b7280;
     }
-
     .msgs-empty {
         margin-top: 10px;
         font-size: 14px;
         color: #6b7280;
     }
-
     .msgs-item-actions a {
         font-size: 13px;
     }
-
     .msgs-badge {
         display: inline-block;
         margin-left: 6px;
@@ -87,12 +77,10 @@
 
 <div class="msgs-wrapper">
     <div class="msgs-card">
-
-        <div class="msgs-title">Сообщения по объявлениям</div>
-
+        <div class="msgs-title">Мои сообщения</div>
         <div class="msgs-sub">
-            Здесь отображаются диалоги по твоим объявлениям: отдельно по каждому пользователю.
-            Новые сообщения помечены значком «Новое».
+            Здесь собраны чаты с мастерами по вашим объявлениям-запросам.
+            Новые ответы мастеров помечены значком «Новое».
         </div>
 
         {% if items %}
@@ -100,7 +88,6 @@
                 {% for it in items %}
                     {% set ad = it.ad %}
                     {% set unread = it.unread_count or 0 %}
-
                     <div class="msgs-item">
                         <div>
                             <div class="msgs-item-title">
@@ -109,42 +96,27 @@
                                     <span class="msgs-badge">Новое · {{ unread }}</span>
                                 {% endif %}
                             </div>
-
                             <div class="msgs-item-sub">
+                                Мастер: {{ it.master_name }}
+                                <br>
                                 Павильон: {{ ad.pavilion.title if ad.pavilion else '—' }}
                                 • объявление №{{ ad.id }}
-                                <br>
-                                Пользователь: {{ it.client_name }}
                             </div>
                         </div>
-
                         <div class="msgs-item-actions">
-                            <a href="{{ url_for('ad_chat', ad_id=ad.id, client_id=it.client_id) }}"
+                            <a href="{{ url_for('ad_chat', ad_id=ad.id) }}"
                                class="btn btn-outline">
                                 Открыть чат
                             </a>
                         </div>
                     </div>
-
                 {% endfor %}
             </div>
         {% else %}
             <div class="msgs-empty">
-                Пока нет диалогов с пользователями по твоим объявлениям.
-                Как только пользователи начнут писать, здесь появится список чатов.
+                Пока у вас нет переписок с мастерами. Оставьте запрос или напишите мастеру в объявлении — здесь появится чат.
             </div>
         {% endif %}
-
     </div>
 </div>
-
-<script>
-    if (window.performance && window.performance.getEntriesByType) {
-        var entries = window.performance.getEntriesByType("navigation");
-        if (entries && entries.length > 0 && entries[0].type === "back_forward") {
-            window.location.reload();
-        }
-    }
-</script>
-
 {% endblock %}

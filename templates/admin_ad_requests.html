@@ -1,53 +1,49 @@
 {% extends "admin_base.html" %}
 
-{% block title %}Заявки — объявления{% endblock %}
+{% block title %}Заявки — объявления и павильоны{% endblock %}
 
 {% block content %}
-
 <div class="admin-page">
-    <!-- Шапка страницы -->
     <div class="admin-page-header">
         <h1 class="admin-page-title">Заявки</h1>
         <p class="admin-page-subtitle">
-            Все заявки мастеров на размещение объявлений в павильонах.
+            Здесь отображаются заявки мастеров на размещение объявлений и новых павильонов.
         </p>
     </div>
 
-    <!-- Табы: улицы / объявления -->
     <div class="admin-tabs">
         <a href="{{ url_for('admin_requests') }}" class="admin-tab">
             Новые улицы
         </a>
         <a href="{{ url_for('admin_ad_requests') }}" class="admin-tab admin-tab-active">
-            Объявления
+            Объявления и павильоны
         </a>
     </div>
 
-    <!-- Статистика по заявкам -->
+    <!-- Статистика по объявлениям -->
     <section class="admin-cards-row">
         <div class="admin-stat-card">
-            <div class="admin-stat-label">Всего</div>
-            <div class="admin-stat-value">{{ stats.total }}</div>
+            <div class="admin-stat-label">Объявления — всего</div>
+            <div class="admin-stat-value">{{ stats_ads.total }}</div>
         </div>
         <div class="admin-stat-card admin-stat-card-orange">
-            <div class="admin-stat-label">Новые</div>
-            <div class="admin-stat-value">{{ stats.pending }}</div>
+            <div class="admin-stat-label">Объявления — новые</div>
+            <div class="admin-stat-value">{{ stats_ads.pending }}</div>
         </div>
         <div class="admin-stat-card admin-stat-card-green">
-            <div class="admin-stat-label">Одобрено</div>
-            <div class="admin-stat-value">{{ stats.approved }}</div>
+            <div class="admin-stat-label">Объявления — одобрено</div>
+            <div class="admin-stat-value">{{ stats_ads.approved }}</div>
         </div>
         <div class="admin-stat-card admin-stat-card-red">
-            <div class="admin-stat-label">Отклонено</div>
-            <div class="admin-stat-value">{{ stats.rejected }}</div>
+            <div class="admin-stat-label">Объявления — отклонено</div>
+            <div class="admin-stat-value">{{ stats_ads.rejected }}</div>
         </div>
     </section>
 
-    <!-- Таблица заявок -->
     <section class="admin-section">
         <h2 class="admin-section-title">Заявки на объявления</h2>
 
-        {% if requests %}
+        {% if ad_requests %}
         <div class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
@@ -63,7 +59,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for r in requests %}
+                    {% for r in ad_requests %}
                     <tr>
                         <td>#{{ r.id }}</td>
                         <td>{{ r.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
@@ -107,8 +103,78 @@
         </div>
         {% else %}
             <p class="admin-empty">
-                Заявок пока нет. Как только мастера начнут предлагать объявления в павильоны,
-                они появятся здесь.
+                Заявок на объявления пока нет.
+            </p>
+        {% endif %}
+    </section>
+
+    <!-- Заявки на павильоны -->
+    <section class="admin-section" style="margin-top: 24px;">
+        <h2 class="admin-section-title">Заявки на новые павильоны</h2>
+
+        {% if pav_requests %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Дата</th>
+                        <th>Мастер</th>
+                        <th>Улица</th>
+                        <th>Название павильона</th>
+                        <th>Первое объявление</th>
+                        <th>Статус</th>
+                        <th class="admin-table-actions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in pav_requests %}
+                    <tr>
+                        <td>#{{ r.id }}</td>
+                        <td>{{ r.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+                        <td>{{ r.user.username }}</td>
+                        <td>{{ r.street.name }}</td>
+                        <td>{{ r.pavilion_title }}</td>
+                        <td>{{ r.ad_title }}</td>
+                        <td>
+                            {% if r.status == "pending" %}
+                                <span class="badge badge-orange">pending</span>
+                            {% elif r.status == "approved" %}
+                                <span class="badge badge-green">approved</span>
+                            {% elif r.status == "rejected" %}
+                                <span class="badge badge-red">rejected</span>
+                            {% else %}
+                                <span class="badge">{{ r.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="admin-table-actions">
+                            {% if r.status == "pending" %}
+                                <form method="post"
+                                      action="{{ url_for('admin_approve_pavilion_request', req_id=r.id) }}"
+                                      class="inline-form">
+                                    <button type="submit" class="btn btn-approve">
+                                        Создать павильон и объявление
+                                    </button>
+                                </form>
+                                <form method="post"
+                                      action="{{ url_for('admin_reject_pavilion_request', req_id=r.id) }}"
+                                      class="inline-form">
+                                    <button type="submit" class="btn btn-reject">Отклонить</button>
+                                </form>
+                            {% else %}
+                                <span class="admin-status-note">
+                                    Заявка уже обработана
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="admin-empty">
+                Заявок на новые павильоны пока нет.
             </p>
         {% endif %}
     </section>
@@ -117,9 +183,7 @@
 <style>
     .admin-page { padding: 8px 24px 32px; }
 
-    .admin-page-header {
-        margin-bottom: 14px;
-    }
+    .admin-page-header { margin-bottom: 14px; }
     .admin-page-title {
         font-size: 26px;
         font-weight: 800;
@@ -272,5 +336,4 @@
         }
     }
 </style>
-
 {% endblock %}

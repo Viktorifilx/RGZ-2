@@ -134,7 +134,7 @@
 
             <div class="chat-title">{{ ad.title }}</div>
             <div class="chat-subtitle">
-                Мастер: {{ ad.author_name or 'Мастер' }}
+                Мастер: {{ ad.master_display_name }}
                 <span class="chat-badge">чат по объявлению</span>
             </div>
         </div>
@@ -172,7 +172,6 @@
             {% endif %}
         </div>
 
-        {# ВАЖНО: отправляем форму именно на /ad/<id>/chat и поле называется message #}
         <form method="post"
               action="{{ url_for('ad_chat', ad_id=ad.id) }}"
               class="chat-form">

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Предложить тему павильона — {{ street.name }}{% endblock %}
+
+{% block content %}
+<section class="form-hero">
+    <a href="{{ url_for('street_page', code=street.code) }}" class="back-link">
+        ← Вернуться на улицу «{{ street.name }}»
+    </a>
+    <h1>Предложить тему павильона</h1>
+    <p>
+        Улица: <b>{{ street.name }}</b>. Придумай название павильона,
+        краткое описание и первое тематическое объявление.
+    </p>
+</section>
+
+<section class="form-section">
+    <div class="form-card">
+        {% if errors %}
+            <ul class="form-errors">
+                {% for e in errors %}
+                    <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post">
+            <div class="form-row">
+                <label>Название павильона<span class="req">*</span></label>
+                <input type="text" name="pavilion_title"
+                       value="{{ form.pavilion_title }}"
+                       required>
+            </div>
+
+            <div class="form-row">
+                <label>Описание павильона (необязательно)</label>
+                <textarea name="pavilion_desc" rows="3">{{ form.pavilion_desc }}</textarea>
+            </div>
+
+            <hr class="form-divider">
+
+            <div class="form-row">
+                <label>Заголовок первого объявления<span class="req">*</span></label>
+                <input type="text" name="ad_title"
+                       value="{{ form.ad_title }}"
+                       required>
+            </div>
+
+            <div class="form-row">
+                <label>Описание объявления<span class="req">*</span></label>
+                <textarea name="ad_text" rows="5" required>{{ form.ad_text }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Отправить заявку администратору
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    .form-hero {
+        max-width: 1040px;
+        margin: 0 auto 16px;
+        padding: 18px 20px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #ffe9c9, #ffeef8, #e0f2fe);
+    }
+    .form-hero h1 {
+        margin: 6px 0 4px;
+        font-size: 28px;
+    }
+    .form-hero p {
+        margin: 0;
+        font-size: 14px;
+        color: #4b5563;
+    }
+
+    .form-section {
+        max-width: 1040px;
+        margin: 0 auto 32px;
+    }
+    .form-card {
+        padding: 20px 22px;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 16px 40px rgba(15,23,42,0.12);
+    }
+    .form-row {
+        margin-bottom: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 14px;
+    }
+    .form-row label {
+        font-weight: 600;
+        color: #374151;
+    }
+    .form-row input,
+    .form-row textarea {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 8px 10px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+    .form-row input:focus,
+    .form-row textarea:focus {
+        outline: none;
+        border-color: #fb7185;
+        box-shadow: 0 0 0 1px rgba(251,113,133,0.25);
+    }
+    .form-errors {
+        list-style: none;
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 13px;
+    }
+    .form-errors li + li { margin-top: 2px; }
+    .form-divider {
+        margin: 12px 0 14px;
+        border: none;
+        border-top: 1px dashed #e5e7eb;
+    }
+    .form-actions {
+        margin-top: 8px;
+    }
+    .req { color: #ef4444; margin-left: 3px; }
+</style>
+{% endblock %}

@@ -4,8 +4,8 @@ from werkzeug.security import generate_password_hash
 
 def create_admin():
     username = "Администратор"
-    email = "admin@example.com"      # Можешь поставить свою почту
-    password_plain = "12345"         # Придумай пароль и запиши его
+    email = "admin@example.com"      
+    password_plain = "12345"         
 
     with app.app_context():
         existing = User.query.filter_by(email=email).first()

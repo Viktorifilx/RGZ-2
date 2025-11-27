@@ -1,4 +1,4 @@
-/* ================== RESET ================== */
+/* reset */
 
 *,
 *::before,
@@ -6,7 +6,7 @@
     box-sizing: border-box;
 }
 
-/* ================== BASE ================== */
+/* база */
 
 body {
     margin: 0;
@@ -15,7 +15,7 @@ body {
     color: #222;
 }
 
-/* ================== HEADER ================== */
+/* шапка */
 
 .site-header {
     position: sticky;
@@ -74,7 +74,7 @@ body {
     gap: 8px;
 }
 
-/* ================== BUTTONS ================== */
+/* кнопки */
 
 .btn {
     border-radius: 999px;
@@ -126,7 +126,7 @@ body {
     background: rgba(255,255,255,0.7);
 }
 
-/* ================== LAYOUT ================== */
+/* контейнер страницы */
 
 .page-content {
     max-width: 1180px;
@@ -134,7 +134,7 @@ body {
     padding: 24px 16px 80px;
 }
 
-/* ================== HERO (главная) ================== */
+/* hero на главной */
 
 .hero {
     display: grid;
@@ -163,7 +163,7 @@ body {
     gap: 10px;
 }
 
-/* Иллюстрация — большая палатка */
+/* большая палатка */
 
 .hero-illustration {
     display: flex;
@@ -208,7 +208,6 @@ body {
     top: -32px;
     width: 0;
     height: 0;
-    border-left: 0;
     border-right: 18px solid transparent;
     border-bottom: 28px solid #ef4444;
     transform: translateX(-50%);
@@ -219,11 +218,11 @@ body {
     color: #6b7280;
 }
 
-/* Общая анимация палаток (используется скриптом через класс .tent) */
+/* анимация палаток .tent */
 
 .tent {
     animation: tent-float 4s ease-in-out infinite;
-    animation-play-state: paused; /* оживляем через IntersectionObserver */
+    animation-play-state: paused;
 }
 
 @keyframes tent-float {
@@ -232,7 +231,7 @@ body {
     100% { transform: translateY(0); }
 }
 
-/* ================== FAIRGROUND (главная — улицы) ================== */
+/* блок улиц на главной */
 
 .fairground h2 {
     font-size: 26px;
@@ -252,7 +251,7 @@ body {
     margin-top: 8px;
 }
 
-/* ------- Улицы на главной ------- */
+/* одна улица */
 
 .street {
     border-radius: 20px;
@@ -293,7 +292,7 @@ body {
     padding: 4px 10px;
 }
 
-/* Цветовые маркеры улиц */
+/* цветовые маркеры улиц */
 
 .street-it {
     border-left: 6px solid #0ea5e9;
@@ -311,7 +310,7 @@ body {
     border-left: 6px solid #f97316;
 }
 
-/* ------- ПАВИЛЬОНЫ НА ГЛАВНОЙ (карточки объявлений) ------- */
+/* павильоны на главной (карточки объявлений) */
 
 .pavilions {
     position: relative;
@@ -322,7 +321,6 @@ body {
     margin-top: 8px;
 }
 
-/* важно: style только для карточек внутри .pavilions */
 .pavilions .pavilion {
     position: relative;
     border-radius: 18px;
@@ -338,7 +336,7 @@ body {
     box-shadow: 0 16px 32px rgba(148, 163, 184, 0.48);
 }
 
-/* Маленький тент сверху карточки */
+/* мини-тент на карточке */
 
 .pavilions .pavilion-top .tent-top {
     position: absolute;
@@ -362,7 +360,7 @@ body {
     transform: translateX(-50%);
 }
 
-/* Тело павильона */
+/* тело карточки */
 
 .pavilions .pavilion-body {
     padding: 40px 14px 10px;
@@ -397,7 +395,7 @@ body {
     margin: 0;
 }
 
-/* Низ карточки */
+/* низ карточки */
 
 .pavilions .pavilion-footer {
     padding: 8px 14px 12px;
@@ -414,7 +412,27 @@ body {
     color: #4b5563;
 }
 
-/* Пустая улица */
+/* подписи под домиками на карте улицы */
+
+.street-map .pavilions-layer .pavilion-badge {
+    padding: 6px 10px 8px;
+}
+
+.street-map .pavilions-layer .pavilion-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 4px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.street-map .pavilions-layer .pavilion-master {
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+/* текст пустой улицы */
 
 .empty-street {
     font-size: 13px;
@@ -422,7 +440,7 @@ body {
     margin: 8px 2px 4px;
 }
 
-/* ================== FOOTER ================== */
+/* подвал */
 
 .site-footer {
     border-top: 1px solid rgba(226, 232, 240, 0.9);
@@ -442,7 +460,7 @@ body {
     align-items: center;
 }
 
-/* ================== ADAPTIVE ================== */
+/* адаптив общий */
 
 @media (max-width: 900px) {
     .hero {
@@ -467,9 +485,7 @@ body {
     }
 }
 
-/* ================== STREET LIST (если используешь) ================== */
-
-/* ----- Главная: список улиц (обновлённый дизайн) ----- */
+/* главная: список улиц (новые карточки) */
 
 .streets-section {
     margin-top: 32px;
@@ -485,8 +501,6 @@ body {
     color: #6b7280;
     max-width: 520px;
 }
-
-/* сетка 4×N, все карточки одинаковой высоты */
 
 .street-grid {
     display: grid;
@@ -507,12 +521,10 @@ body {
     padding: 18px 20px;
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
     border: 1px solid rgba(226, 232, 240, 0.9);
-
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 12px;
-
     transition: transform 0.18s ease, box-shadow 0.18s ease,
                 border-color 0.18s ease, background 0.18s ease;
 }
@@ -554,7 +566,7 @@ body {
     margin: 0;
 }
 
-/* низ карточки */
+/* низ карточки улицы */
 
 .street-card-bottom {
     display: flex;
@@ -576,7 +588,7 @@ body {
     font-weight: 500;
 }
 
-/* мелкие украшения для hero */
+/* мелкие подписи в hero */
 
 .hero-main .hero-kicker {
     font-size: 13px;
@@ -601,7 +613,7 @@ body {
     font-size: 12px;
 }
 
-/* маленькая «городская» иллюстрация справа в hero */
+/* мини-город в hero */
 
 .hero-city {
     align-items: flex-end;
@@ -673,7 +685,7 @@ body {
     margin-top: -1px;
 }
 
-/* ================== STREET PAGE — ОБЩЕЕ ================== */
+/* страница улицы: шапка */
 
 .street-hero {
     margin-bottom: 16px;
@@ -697,495 +709,7 @@ body {
     margin-top: 10px;
 }
 
-/* базовый контейнер карты улицы */
-.street-map {
-    position: relative;
-    width: 100%;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
-    background: #000;
-}
-
-/* ================== ВАРИАНТ 1 — CITY MAP С КРУГЛЫМИ ПЯТНАМИ ================== */
-
-.city-map {
-    position: relative;
-    border-radius: 32px;
-    padding: 26px;
-    background: radial-gradient(circle at top, #ffe3f2 0, #fff4dd 40%, #ffffff 90%);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
-    min-height: 280px;
-    overflow: hidden;
-}
-
-.city-background {
-    position: absolute;
-    inset: 0;
-    opacity: 0.45;
-    pointer-events: none;
-}
-
-.city-layer {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(28px);
-}
-
-.city-layer-back {
-    width: 55%;
-    height: 55%;
-    background: #ffb3cf;
-    top: -10%;
-    right: -10%;
-}
-
-.city-layer-middle {
-    width: 50%;
-    height: 50%;
-    background: #ffc676;
-    bottom: -15%;
-    left: 5%;
-}
-
-.city-layer-front {
-    width: 40%;
-    height: 40%;
-    background: #8fd5ff;
-    top: 20%;
-    left: 35%;
-}
-
-.pavilions-grid {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
-    z-index: 1;
-}
-
-.pavilion-dot-card {
-    position: relative;
-    text-decoration: none;
-    color: inherit;
-}
-
-.pavilion-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 999px;
-    background: #ff4f8b;
-    box-shadow: 0 0 0 6px rgba(255, 79, 139, 0.25);
-    margin-bottom: 8px;
-}
-
-.pavilion-popup {
-    background: rgba(255, 255, 255, 0.96);
-    border-radius: 20px;
-    padding: 14px 16px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.pavilion-dot-card:hover .pavilion-popup {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-}
-
-.pavilion-popup-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-}
-
-.avatar-circle {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    background: linear-gradient(135deg, #ff4f8b, #ffb347);
-    color: white;
-}
-
-.avatar-circle.big {
-    width: 44px;
-    height: 44px;
-    font-size: 1.2rem;
-}
-
-.pavilion-popup-title {
-    font-size: 0.95rem;
-    margin-bottom: 4px;
-}
-
-.pavilion-popup-text {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 6px;
-}
-
-.empty-street.big {
-    padding: 20px;
-    text-align: center;
-    font-size: 0.95rem;
-    color: #777;
-}
-
-/* ================== AD PAGE (павильон) ================== */
-
-.ad-hero {
-    max-width: 720px;
-    margin: 0 auto;
-}
-
-.ad-card-full {
-    margin-top: 18px;
-    background: rgba(255, 255, 255, 0.98);
-    border-radius: 28px;
-    padding: 22px 24px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
-}
-
-.ad-card-header {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    margin-bottom: 14px;
-}
-
-.ad-card-header h1 {
-    font-size: 1.4rem;
-    margin-bottom: 4px;
-}
-
-.ad-author-line,
-.ad-street-line {
-    font-size: 0.9rem;
-    color: #777;
-}
-
-.ad-card-body p {
-    font-size: 0.98rem;
-    line-height: 1.5;
-}
-
-/* ================== ВАРИАНТ 2 — УЛИЦА С ДОМИКАМИ (house.PNG) ================== */
-
-/*фон-картинка улицы*/
-.street-map .street-bg {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-/* слой с домиками */
-.houses-layer {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 18px;
-    padding: 24px;
-    backdrop-filter: blur(2px);
-}
-
-/* карточка-домик */
-.house-card {
-    text-decoration: none;
-    color: inherit;
-    display: inline-block;
-}
-
-.house-roof {
-    width: 70%;
-    height: 18px;
-    margin: 0 auto;
-    border-radius: 8px 8px 0 0;
-    background: linear-gradient(135deg, #ff4f8b, #ffc36b);
-}
-
-.house-body {
-    background: rgba(255, 255, 255, 0.96);
-    border-radius: 16px;
-    padding: 10px 12px 12px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
-    transform: translateY(-4px);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.house-card:hover .house-body {
-    transform: translateY(-8px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
-}
-
-.house-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #ff4f8b, #ffb347);
-    color: #fff;
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-}
-
-.house-title {
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-}
-
-.house-author {
-    font-size: 0.8rem;
-    color: #777;
-}
-
-/* ================== ВАРИАНТ 3 — РЯД ПАЛАТОК (pavilions-row) ================== */
-
-.street-map-card {
-    position: relative;
-    border-radius: 32px;
-    overflow: hidden;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
-    background: #000;
-}
-
-/* для этого варианта фон задаётся через .street-map-bg */
-.street-map-card .street-map-bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    filter: saturate(1.05);
-}
-
-/* накладка для текста */
-.street-map-card .street-map-overlay {
-    position: relative;
-    padding: 28px 32px 32px;
-    background: linear-gradient(
-        to top,
-        rgba(255, 255, 255, 0.02) 0%,
-        rgba(255, 255, 255, 0.6) 35%,
-        rgba(255, 255, 255, 0.85) 60%,
-        rgba(255, 255, 255, 0.95) 100%
-    );
-}
-
-/* ряд палаток */
-.pavilions-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 14px;
-    min-height: 220px;
-}
-
-/* общий вид павильона только в этом ряду */
-.pavilions-row .pavilion {
-    width: 18%;
-    text-decoration: none;
-    color: inherit;
-}
-
-.pavilions-row .tent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform-origin: center bottom;
-}
-
-/* крыша палатки */
-.pavilions-row .tent-roof {
-    width: 100%;
-    max-width: 110px;
-    height: 34px;
-    border-radius: 14px 14px 0 0;
-    background: repeating-linear-gradient(
-        90deg,
-        #ff4f8b 0,
-        #ff4f8b 16px,
-        #ffffff 16px,
-        #ffffff 32px
-    );
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.18);
-}
-
-/* тело палатки */
-.pavilions-row .tent-body {
-    width: 100%;
-    max-width: 110px;
-    background: #ffffff;
-    border-radius: 0 0 16px 16px;
-    padding: 6px 8px 8px;
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.15);
-    margin-top: -1px;
-}
-
-.pavilions-row .tent-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-    max-height: 3em;
-    overflow: hidden;
-}
-
-.pavilions-row .tent-master {
-    font-size: 0.7rem;
-    color: #777;
-}
-
-.pavilions-row .pavilion.has-ad .tent {
-    cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.pavilions-row .pavilion.has-ad:hover .tent {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.25);
-}
-
-.pavilions-row .pavilion.empty .tent {
-    opacity: 0.45;
-    animation: none;
-}
-
-/* ================== ВАРИАНТ 4 — ТВОЯ ТЕКУЩАЯ КАРТА С house.PNG ================== */
-
-/* слой с палатками поверх фоновой street_bg.png */
-.pavilions-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none; /* клики только по самим ссылкам-павильонам */
-}
-
-/* один павильон в слое карты */
-.pavilions-layer .pavilion {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    pointer-events: auto;
-    text-decoration: none;
-    color: inherit;
-}
-
-.pavilions-layer .pavilion-inner {
-    position: relative;
-    width: 140px;
-    max-width: 18vw;
-    margin: 0 auto;
-    animation: pavilion-float 4s ease-in-out infinite;
-}
-
-.pavilions-layer .pavilion-img {
-    width: 100%;
-    display: block;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
-    transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-/* подпись под палаткой */
-.pavilions-layer .pavilion-badge {
-    margin-top: 4px;
-    padding: 4px 6px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.97);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
-    min-width: 120px;
-}
-
-.pavilions-layer .pavilion-title {
-    font-size: 0.75rem;
-    font-weight: 600;
-    max-height: 2.4em;
-    overflow: hidden;
-}
-
-.pavilions-layer .pavilion-master {
-    margin-top: 2px;
-    font-size: 0.7rem;
-    color: #777;
-}
-
-/* анимация покачивания домика */
-@keyframes pavilion-float {
-    0%   { transform: translateY(0); }
-    50%  { transform: translateY(-4px); }
-    100% { transform: translateY(0); }
-}
-
-/* hover только для реальных объявлений */
-.pavilions-layer .pavilion.has-ad:hover .pavilion-img {
-    transform: translateY(-10px) scale(1.05);
-    filter: drop-shadow(0 12px 20px rgba(255, 120, 120, 0.9));
-}
-
-.pavilions-layer .pavilion.has-ad:hover .pavilion-badge {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
-}
-
-/* пустые павильоны */
-.pavilions-layer .pavilion.empty .pavilion-inner {
-    animation: none;
-}
-
-.pavilions-layer .pavilion.empty .pavilion-img {
-    opacity: 0.45;
-    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
-}
-
-.pavilions-layer .pavilion.empty .pavilion-badge {
-    background: rgba(255, 255, 255, 0.88);
-}
-
-/* псевдо-3D: размеры слотов */
-
-.pavilions-layer .pavilion-inner {
-    width: 140px;
-}
-
-.pavilions-layer .slot-3 .pavilion-inner {
-    width: 130px;
-}
-
-.pavilions-layer .slot-2 .pavilion-inner,
-.pavilions-layer .slot-4 .pavilion-inner {
-    width: 150px;
-}
-
-.pavilions-layer .slot-1 .pavilion-inner,
-.pavilions-layer .slot-5 .pavilion-inner {
-    width: 165px;
-}
-
-/* адаптив размеров домиков */
-
-@media (max-width: 900px) {
-    .pavilions-layer .pavilion-inner {
-        width: 110px;
-    }
-
-    .pavilions-layer .slot-3 .pavilion-inner {
-        width: 100px;
-    }
-
-    .pavilions-layer .slot-2 .pavilion-inner,
-    .pavilions-layer .slot-4 .pavilion-inner {
-        width: 120px;
-    }
-
-    .pavilions-layer .slot-1 .pavilion-inner,
-    .pavilions-layer .slot-5 .pavilion-inner {
-        width: 130px;
-    }
-}
-
-/* ===== КАРТА УЛИЦЫ С ДОРОЖКОЙ И ПАЛАТКАМИ ===== */
+/* карта улицы с дорожкой и палатками */
 
 .street-map {
     position: relative;
@@ -1196,21 +720,24 @@ body {
     background: #000;
 }
 
-/* фон улицы — большая картинка */
+/* фон-картинка улицы */
+
 .street-bg {
     display: block;
     width: 100%;
     height: auto;
 }
 
-/* слой с палатками поверх фона */
+/* слой с палатками */
+
 .pavilions-layer {
     position: absolute;
     inset: 0;
-    pointer-events: none; /* чтобы кликалось только по палаткам */
+    pointer-events: none;
 }
 
-/* общие стили одного павильона */
+/* один павильон */
+
 .pavilion {
     position: absolute;
     transform: translate(-50%, -50%);
@@ -1220,7 +747,8 @@ body {
     color: inherit;
 }
 
-/* “тело” палатки, скейлим для псевдо-3D */
+/* тело палатки */
+
 .pavilion-inner {
     position: relative;
     width: 140px;
@@ -1229,7 +757,8 @@ body {
     animation: pavilion-float 4s ease-in-out infinite;
 }
 
-/* сама картинка палатки — ПОЛНАЯ прозрачность вокруг */
+/* картинка домика */
+
 .pavilion-img {
     width: 100%;
     height: auto;
@@ -1239,7 +768,8 @@ body {
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-/* подпись под палаткой */
+/* подпись домика */
+
 .pavilion-badge {
     margin-top: 4px;
     padding: 4px 6px;
@@ -1262,14 +792,16 @@ body {
     color: #777;
 }
 
-/* анимация покачивания */
+/* покачивание домика */
+
 @keyframes pavilion-float {
     0%   { transform: translateY(0); }
     50%  { transform: translateY(-4px); }
     100% { transform: translateY(0); }
 }
 
-/* активный павильон (есть объявление) */
+/* активный домик */
+
 .pavilion.has-ad .pavilion-inner {
     cursor: pointer;
 }
@@ -1283,7 +815,8 @@ body {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* пустые павильоны более бледные, без подпрыгивания */
+/* пустой домик */
+
 .pavilion.empty .pavilion-inner {
     animation: none;
 }
@@ -1297,41 +830,67 @@ body {
     background: rgba(255, 255, 255, 0.88);
 }
 
-/* --- Позиции палаток вдоль дорожки --- */
+/* позиции домиков по слотам */
 
-/* левая ближняя к нам */
 .pavilion.slot-1 {
     top: 72%;
     left: 18%;
 }
 
-/* левая средняя */
 .pavilion.slot-2 {
     top: 65%;
     left: 34%;
 }
 
-/* центральная — прямо над дорожкой, но низко */
 .pavilion.slot-3 {
     top: 62%;
     left: 50%;
 }
 
-/* правая средняя */
 .pavilion.slot-4 {
     top: 65%;
     left: 66%;
 }
 
-/* правая ближняя к нам */
 .pavilion.slot-5 {
     top: 72%;
     left: 82%;
 }
 
+/* размеры домиков по слотам */
 
-/* ===== Виджет поддержки на страницах улиц ===== */
-/* ===== Небольшой виджет поддержки внизу справа ===== */
+.pavilions-layer .slot-3 .pavilion-inner {
+    width: 130px;
+}
+
+.pavilions-layer .slot-2 .pavilion-inner,
+.pavilions-layer .slot-4 .pavilion-inner {
+    width: 150px;
+}
+
+.pavilions-layer .slot-1 .pavilion-inner,
+.pavilions-layer .slot-5 .pavilion-inner {
+    width: 165px;
+}
+
+@media (max-width: 900px) {
+    .pavilions-layer .pavilion-inner {
+        width: 110px;
+    }
+    .pavilions-layer .slot-3 .pavilion-inner {
+        width: 100px;
+    }
+    .pavilions-layer .slot-2 .pavilion-inner,
+    .pavilions-layer .slot-4 .pavilion-inner {
+        width: 120px;
+    }
+    .pavilions-layer .slot-1 .pavilion-inner,
+    .pavilions-layer .slot-5 .pavilion-inner {
+        width: 130px;
+    }
+}
+
+/* виджет поддержки */
 
 .support-fab {
     position: fixed;
@@ -1356,11 +915,10 @@ body {
     box-shadow: 0 16px 40px rgba(148, 163, 184, 0.9);
 }
 
-/* сам виджет */
 .support-widget {
     position: fixed;
     right: 24px;
-    bottom: 80px; /* чуть выше кнопки ? */
+    bottom: 80px;
     z-index: 39;
     width: min(360px, 92vw);
     border-radius: 18px;
@@ -1484,7 +1042,7 @@ body {
     }
 }
 
-/* ===== Главная: "вау"-главная ===== */
+/* главная: большая шапка */
 
 .index-hero {
     display: grid;
@@ -1674,14 +1232,13 @@ body {
     box-shadow: 0 8px 18px rgba(15,23,42,0.15);
 }
 
-/* анимация карточки справа */
 @keyframes hero-card-float {
     0%   { transform: translateY(0); }
     50%  { transform: translateY(-8px); }
     100% { transform: translateY(0); }
 }
 
-/* ===== Сетка улиц ===== */
+/* сетка улиц под большой шапкой */
 
 .index-streets {
     margin-top: 40px;
@@ -1699,7 +1256,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* мягкие «орбиты» фона под сеткой */
 .index-streets-bg-orbit {
     position: absolute;
     border-radius: 999px;
@@ -1724,7 +1280,6 @@ body {
     right: -40px;
 }
 
-/* сетка карточек улиц */
 .index-street-grid {
     position: relative;
     display: grid;
@@ -1732,7 +1287,6 @@ body {
     gap: 22px;
 }
 
-/* карточки одинаковой высоты */
 .index-street-card {
     text-decoration: none;
     color: inherit;
@@ -1795,8 +1349,6 @@ body {
     color: #ec4899;
 }
 
-/* адаптив */
-
 @media (max-width: 980px) {
     .index-hero {
         grid-template-columns: 1fr;
@@ -1816,7 +1368,7 @@ body {
     }
 }
 
-/* ===== ПАВИЛЬОН ===== */
+/* страница павильона: шапка */
 
 .pavilion-hero {
     padding: 32px 0 16px;
@@ -1879,7 +1431,7 @@ body {
     background: rgba(255,255,255,0.8);
 }
 
-/* демо-карточка справа */
+/* демо-карточка в шапке павильона */
 
 .pavilion-hero-card-demo {
     display: flex;
@@ -1907,7 +1459,7 @@ body {
     color: #777;
 }
 
-/* список объявлений */
+/* список объявлений в павильоне */
 
 .pavilion-ads-section {
     margin-top: 16px;
@@ -1987,7 +1539,8 @@ body {
     margin-bottom: 8px;
 }
 
-/* затемнение фона */
+/* модальное окно подтверждения */
+
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -1998,12 +1551,10 @@ body {
     z-index: 2000;
 }
 
-/* показываем модалку */
 .modal-overlay.open {
     display: flex;
 }
 
-/* окно */
 .modal-window {
     background: white;
     padding: 26px 28px;
@@ -2016,7 +1567,7 @@ body {
 
 @keyframes scaleIn {
     from { transform: scale(.92); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
+    to   { transform: scale(1);   opacity: 1; }
 }
 
 .modal-window h3 {
@@ -2030,7 +1581,6 @@ body {
     margin-bottom: 16px;
 }
 
-/* кнопки */
 .modal-actions {
     display: flex;
     justify-content: space-between;
@@ -2060,4 +1610,40 @@ body {
 
 .delete-btn:hover {
     background: #dc2626;
+}
+
+/* бейдж сообщений в шапке */
+
+.nav-messages-link {
+    position: relative;
+}
+
+.nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    padding: 0 6px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 999px;
+    background: #ff4fd8;
+    color: #fff;
+}
+
+/* маленькая плашка "новые сообщения" */
+
+.messages-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+.messages-pill-new {
+    background: rgba(255,79,216,0.12);
+    color: #b91c1c;
 }

@@ -11,14 +11,12 @@
 
 <section class="street-map-section">
     <div class="street-map">
-        <!-- фон улицы -->
         <img
             src="{{ url_for('static', filename='images/street_bg.png') }}"
             alt="Карта улицы"
             class="street-bg"
         >
 
-        <!-- слой с палатками -->
         <div class="pavilions-layer">
             {% set max_slots = 5 %}
             {% set pav_list = pavilions[:max_slots] %}
@@ -42,17 +40,32 @@
                         </div>
                     </a>
                 {% else %}
-                    <div class="pavilion slot-{{ slot }} empty">
-                        <div class="pavilion-inner">
-                            <img src="{{ url_for('static', filename='icons/house.PNG') }}"
-                                 alt="Свободный павильон"
-                                 class="pavilion-img">
-                            <div class="pavilion-badge">
-                                <div class="pavilion-title">Свободный павильон</div>
-                                <div class="pavilion-master">Место для новой темы</div>
+                    {% if session.get('user_role') in ['master', 'admin'] %}
+                        <a href="{{ url_for('pavilion_request', street_id=street.id) }}"
+                           class="pavilion slot-{{ slot }} empty can-request">
+                            <div class="pavilion-inner">
+                                <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                     alt="Свободный павильон"
+                                     class="pavilion-img">
+                                <div class="pavilion-badge">
+                                    <div class="pavilion-title">Свободный павильон</div>
+                                    <div class="pavilion-master">Нажми, чтобы предложить тему</div>
+                                </div>
+                            </div>
+                        </a>
+                    {% else %}
+                        <div class="pavilion slot-{{ slot }} empty">
+                            <div class="pavilion-inner">
+                                <img src="{{ url_for('static', filename='icons/house.PNG') }}"
+                                     alt="Свободный павильон"
+                                     class="pavilion-img">
+                                <div class="pavilion-badge">
+                                    <div class="pavilion-title">Свободный павильон</div>
+                                    <div class="pavilion-master">Место для новой темы</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>

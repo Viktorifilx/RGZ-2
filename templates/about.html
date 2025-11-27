@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="about-page">
-    <!-- мягкие фоновые пятна -->
     <div class="about-blob about-blob-1"></div>
     <div class="about-blob about-blob-2"></div>
 
@@ -18,6 +17,7 @@
         <h1 class="about-title">
             Что такое <span>цифровая ярмарка</span> FairMarket?
         </h1>
+
         <p class="about-lead">
             FairMarket — это маленький онлайн-город: у него есть улицы, домики-павильоны
             и мастера, которые помогают с кодом, учёбой, дизайном и творческими задачами.
@@ -60,8 +60,7 @@
         <article class="about-card fade-up" data-delay="160">
             <h2>Кому подходит ярмарка</h2>
             <p>
-                FairMarket — для студентов, школьников, начинающих специалистов и творческих
-                ребят, которые:
+                FairMarket — для студентов, школьников, начинающих специалистов и творческих ребят, которые:
             </p>
             <ul>
                 <li>делают лабораторные, курсовые или проекты;</li>
@@ -74,6 +73,7 @@
 
     <section class="about-section fade-up" data-delay="0">
         <h2>Чем FairMarket отличается от обычных площадок</h2>
+
         <div class="about-diff-grid">
             <div class="about-diff-card">
                 <h3>Уют вместо перегруза</h3>
@@ -82,13 +82,15 @@
                     Улицы, домики и объявления помогают не потеряться.
                 </p>
             </div>
+
             <div class="about-diff-card">
                 <h3>Фокус на помощи</h3>
                 <p>
-                    Акцент сделан не на продажах, а на поддержке, объяснениях и совместной работе
-                    над задачами.
+                    Акцент сделан не на продажах, а на поддержке, объяснениях
+                    и совместной работе над задачами.
                 </p>
             </div>
+
             <div class="about-diff-card">
                 <h3>Простые роли</h3>
                 <p>
@@ -96,6 +98,7 @@
                     Никаких сложных статусов и тарифов.
                 </p>
             </div>
+
             <div class="about-diff-card">
                 <h3>Живая поддержка</h3>
                 <p>
@@ -108,6 +111,7 @@
 
     <section class="about-section about-section-light fade-up" data-delay="40">
         <h2>Кто такие мастера ярмарки</h2>
+
         <p class="about-text-wide">
             <b>Мастер</b> — это не должность, а роль. Это человек, который чуть лучше разбирается в теме
             и готов поделиться опытом: объяснить задачу, подсказать, как оформить работу,
@@ -123,6 +127,7 @@
                     <li>поддерживают пользователей и делятся опытом.</li>
                 </ul>
             </div>
+
             <div class="about-role-card">
                 <h3>Пользователи</h3>
                 <ul>
@@ -135,283 +140,314 @@
     </section>
 
     <section class="about-section fade-up" data-delay="0">
-        <h2>Немного о создателе ярмарки</h2>
+        <h2>Зачем нужна ярмарка</h2>
+
         <p class="about-text-wide">
-            FairMarket — учебный проект, который показывает, как может выглядеть
-            современный, аккуратный и дружелюбный сервис помощи. Структура улиц, домиков
-            и объявлений придумывалась так, чтобы её было удобно и защищать на паре,
-            и развивать дальше как настоящий цифровой продукт.
+            FairMarket помогает быстрее находить решения, идеи и советы.
+            Улицы и домики организованы так, чтобы каждый мог без лишних шагов попасть
+            к нужному мастеру и получить понятную помощь.
         </p>
     </section>
 </div>
 
 <style>
-.about-page {
-    position: relative;
-    padding: 32px 0 60px;
-    overflow: hidden;
-}
-
-/* фоновые «пятна» */
-.about-blob {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(40px);
-    opacity: 0.7;
-    pointer-events: none;
-    animation: blob-move 22s infinite alternate ease-in-out;
-}
-.about-blob-1 {
-    width: 320px;
-    height: 320px;
-    top: -80px;
-    right: -60px;
-    background: radial-gradient(circle at 30% 30%, #ff80ea, #fb923c);
-}
-.about-blob-2 {
-    width: 260px;
-    height: 260px;
-    bottom: -80px;
-    left: -40px;
-    background: radial-gradient(circle at 70% 70%, #6366f1, #22c55e);
-    animation-delay: 4s;
-}
-
-@keyframes blob-move {
-    0%   { transform: translate3d(0, 0, 0) scale(1); }
-    50%  { transform: translate3d(20px, -10px, 0) scale(1.05); }
-    100% { transform: translate3d(-10px, 10px, 0) scale(1.03); }
-}
-
-/* заголовочный блок */
-.about-hero {
-    position: relative;
-    z-index: 1;
-    padding-bottom: 20px;
-}
-.about-back {
-    display: inline-block;
-    margin-bottom: 10px;
-    font-size: 14px;
-    color: #6b7280;
-    text-decoration: none;
-}
-.about-back:hover {
-    text-decoration: underline;
-}
-.about-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .14em;
-    color: #f97316;
-    padding: 4px 11px;
-    border-radius: 999px;
-    background: linear-gradient(120deg,#fff7ed,#fdf2ff);
-    box-shadow: 0 8px 20px rgba(248, 113, 113, 0.15);
-}
-.about-badge::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: radial-gradient(circle,#ec4899,#fb923c);
-}
-.about-title {
-    font-size: 32px;
-    font-weight: 800;
-    margin: 10px 0 10px;
-}
-.about-title span {
-    color: #ec4899;
-}
-.about-lead {
-    max-width: 640px;
-    font-size: 15px;
-    color: #4b5563;
-}
-.about-chips {
-    margin-top: 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.about-chips span {
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 6px 14px rgba(15,23,42,.06);
-}
-
-/* карточки */
-.about-grid {
-    margin-top: 26px;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-    position: relative;
-    z-index: 1;
-}
-.about-card {
-    background: rgba(255,255,255,0.98);
-    border-radius: 20px;
-    padding: 16px 18px 14px;
-    box-shadow: 0 18px 40px rgba(15,23,42,.08);
-    font-size: 14px;
-    transform-origin: center;
-    transition: transform .22s ease, box-shadow .22s ease, translate .22s ease;
-}
-.about-card h2 {
-    font-size: 17px;
-    margin-bottom: 8px;
-}
-.about-card ul {
-    margin: 6px 0 0 18px;
-    padding: 0;
-}
-.about-card li {
-    margin-bottom: 3px;
-}
-.about-card:hover {
-    transform: translateY(-6px) scale(1.01);
-    box-shadow: 0 24px 50px rgba(15,23,42,.14);
-}
-
-.about-values li + li {
-    margin-top: 4px;
-}
-
-/* секции */
-.about-section {
-    margin-top: 34px;
-    position: relative;
-    z-index: 1;
-}
-.about-section h2 {
-    font-size: 22px;
-    margin-bottom: 10px;
-}
-.about-text-wide {
-    max-width: 780px;
-    font-size: 14px;
-    color: #4b5563;
-}
-
-/* сравнение площадок */
-.about-diff-grid {
-    margin-top: 10px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-.about-diff-card {
-    background: #fff;
-    border-radius: 18px;
-    padding: 12px 14px 10px;
-    box-shadow: 0 14px 32px rgba(15,23,42,.05);
-    font-size: 14px;
-    transition: transform .18s ease, box-shadow .18s ease;
-}
-.about-diff-card h3 {
-    font-size: 15px;
-    margin-bottom: 4px;
-}
-.about-diff-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(15,23,42,.10);
-}
-
-/* блок про роли */
-.about-section-light {
-    background: linear-gradient(135deg,#fdf2ff,#eff6ff);
-    margin-left: -24px;
-    margin-right: -24px;
-    padding: 20px 24px 22px;
-    border-radius: 24px;
-}
-.about-role-grid {
-    margin-top: 14px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-.about-role-card {
-    background: rgba(255,255,255,0.96);
-    border-radius: 16px;
-    padding: 12px 14px 10px;
-    font-size: 14px;
-    box-shadow: 0 12px 32px rgba(15,23,42,.12);
-    position: relative;
-    overflow: hidden;
-}
-.about-role-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 0 0, rgba(236,72,153,0.16), transparent 55%);
-    opacity: 0;
-    transition: opacity .25s ease;
-}
-.about-role-card h3 {
-    font-size: 15px;
-    margin-bottom: 6px;
-}
-.about-role-card ul {
-    margin: 0 0 0 18px;
-    padding: 0;
-}
-.about-role-card li {
-    margin-bottom: 3px;
-}
-.about-role-card:hover::before {
-    opacity: 1;
-}
-
-/* анимация появления */
-.fade-up {
-    opacity: 0;
-    transform: translateY(22px);
-    transition:
-        opacity .5s ease-out,
-        transform .5s ease-out;
-}
-.fade-up.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-.fade-up[data-delay] {
-    transition-delay: calc(var(--delay, 0ms));
-}
-
-/* адаптив */
-@media (max-width: 960px) {
-    .about-grid {
-        grid-template-columns: 1fr;
+    .about-page {
+        position: relative;
+        padding: 32px 0 60px;
+        overflow: hidden;
     }
-    .about-diff-grid {
-        grid-template-columns: 1fr;
+
+    /* фоновые «пятна» */
+    .about-blob {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(40px);
+        opacity: 0.7;
+        pointer-events: none;
+        animation: blob-move 22s infinite alternate ease-in-out;
     }
-    .about-role-grid {
-        grid-template-columns: 1fr;
+
+    .about-blob-1 {
+        width: 320px;
+        height: 320px;
+        top: -80px;
+        right: -60px;
+        background: radial-gradient(circle at 30% 30%, #ff80ea, #fb923c);
     }
-    .about-section-light {
-        margin-left: 0;
-        margin-right: 0;
+
+    .about-blob-2 {
+        width: 260px;
+        height: 260px;
+        bottom: -80px;
+        left: -40px;
+        background: radial-gradient(circle at 70% 70%, #6366f1, #22c55e);
+        animation-delay: 4s;
     }
+
+    @keyframes blob-move {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(20px, -10px, 0) scale(1.05); }
+        100% { transform: translate3d(-10px, 10px, 0) scale(1.03); }
+    }
+
+    /* заголовочный блок */
+    .about-hero {
+        position: relative;
+        z-index: 1;
+        padding-bottom: 20px;
+    }
+
+    .about-back {
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: #6b7280;
+        text-decoration: none;
+    }
+
+    .about-back:hover {
+        text-decoration: underline;
+    }
+
+    .about-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .14em;
+        color: #f97316;
+        padding: 4px 11px;
+        border-radius: 999px;
+        background: linear-gradient(120deg,#fff7ed,#fdf2ff);
+        box-shadow: 0 8px 20px rgba(248, 113, 113, 0.15);
+    }
+
+    .about-badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: radial-gradient(circle,#ec4899,#fb923c);
+    }
+
     .about-title {
-        font-size: 26px;
+        font-size: 32px;
+        font-weight: 800;
+        margin: 10px 0 10px;
     }
-}
+
+    .about-title span {
+        color: #ec4899;
+    }
+
+    .about-lead {
+        max-width: 640px;
+        font-size: 15px;
+        color: #4b5563;
+    }
+
+    .about-chips {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .about-chips span {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 6px 14px rgba(15,23,42,.06);
+    }
+
+    /* карточки */
+    .about-grid {
+        margin-top: 26px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .about-card {
+        background: rgba(255,255,255,0.98);
+        border-radius: 20px;
+        padding: 16px 18px 14px;
+        box-shadow: 0 18px 40px rgba(15,23,42,.08);
+        font-size: 14px;
+        transform-origin: center;
+        transition: transform .22s ease, box-shadow .22s ease, translate .22s ease;
+    }
+
+    .about-card h2 {
+        font-size: 17px;
+        margin-bottom: 8px;
+    }
+
+    .about-card ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+    }
+
+    .about-card li {
+        margin-bottom: 3px;
+    }
+
+    .about-card:hover {
+        transform: translateY(-6px) scale(1.01);
+        box-shadow: 0 24px 50px rgba(15,23,42,.14);
+    }
+
+    .about-values li + li {
+        margin-top: 4px;
+    }
+
+    /* секции */
+    .about-section {
+        margin-top: 34px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .about-section h2 {
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    .about-text-wide {
+        max-width: 780px;
+        font-size: 14px;
+        color: #4b5563;
+    }
+
+    /* сравнение площадок */
+    .about-diff-grid {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .about-diff-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 12px 14px 10px;
+        box-shadow: 0 14px 32px rgba(15,23,42,.05);
+        font-size: 14px;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .about-diff-card h3 {
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+
+    .about-diff-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 40px rgba(15,23,42,.10);
+    }
+
+    /* блок про роли */
+    .about-section-light {
+        background: linear-gradient(135deg,#fdf2ff,#eff6ff);
+        margin-left: -24px;
+        margin-right: -24px;
+        padding: 20px 24px 22px;
+        border-radius: 24px;
+    }
+
+    .about-role-grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .about-role-card {
+        background: rgba(255,255,255,0.96);
+        border-radius: 16px;
+        padding: 12px 14px 10px;
+        font-size: 14px;
+        box-shadow: 0 12px 32px rgba(15,23,42,.12);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-role-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0 0, rgba(236,72,153,0.16), transparent 55%);
+        opacity: 0;
+        transition: opacity .25s ease;
+    }
+
+    .about-role-card h3 {
+        font-size: 15px;
+        margin-bottom: 6px;
+    }
+
+    .about-role-card ul {
+        margin: 0 0 0 18px;
+        padding: 0;
+    }
+
+    .about-role-card li {
+        margin-bottom: 3px;
+    }
+
+    .about-role-card:hover::before {
+        opacity: 1;
+    }
+
+    /* анимация появления */
+    .fade-up {
+        opacity: 0;
+        transform: translateY(22px);
+        transition: opacity .5s ease-out, transform .5s ease-out;
+    }
+
+    .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .fade-up[data-delay] {
+        transition-delay: calc(var(--delay, 0ms));
+    }
+
+    /* адаптив */
+    @media (max-width: 960px) {
+        .about-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .about-diff-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .about-role-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .about-section-light {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .about-title {
+            font-size: 26px;
+        }
+    }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const items = document.querySelectorAll('.fade-up');
 
-    // выставляем задержку из data-delay
     items.forEach(el => {
         const d = el.dataset.delay;
         if (d) {
@@ -433,4 +469,5 @@ document.addEventListener('DOMContentLoaded', function () {
     items.forEach(el => observer.observe(el));
 });
 </script>
+
 {% endblock %}

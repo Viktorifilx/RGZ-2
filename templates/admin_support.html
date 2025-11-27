@@ -3,305 +3,292 @@
 {% block title %}Сообщения в поддержку{% endblock %}
 
 {% block content %}
-<section class="admin-section">
-    <header class="admin-section-header">
-        <h1>Сообщения в поддержку</h1>
-        <p>
-            Пользователи делятся проблемами и идеями. Отмечай обработанные сообщения,
-            чтобы не потеряться.
+
+<div class="admin-page">
+    <!-- флеш-сообщения -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        <div class="admin-flash-wrapper">
+          {% for category, message in messages %}
+            <div class="admin-flash admin-flash-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="admin-page-header">
+        <h1 class="admin-page-title">Сообщения в поддержку</h1>
+        <p class="admin-page-subtitle">
+            Пользователи делятся проблемами и идеями. Отмечай обработанные сообщения, чтобы не потеряться.
         </p>
-    </header>
+    </div>
 
     <!-- Статистика -->
-    <div class="admin-stats-row">
+    <section class="admin-cards-row">
         <div class="admin-stat-card">
             <div class="admin-stat-label">Всего</div>
             <div class="admin-stat-value">{{ stats.total }}</div>
         </div>
-        <div class="admin-stat-card">
+        <div class="admin-stat-card admin-stat-card-orange">
             <div class="admin-stat-label">Новые</div>
             <div class="admin-stat-value">{{ stats.new }}</div>
         </div>
-        <div class="admin-stat-card">
+        <div class="admin-stat-card admin-stat-card-green">
             <div class="admin-stat-label">Обработано</div>
             <div class="admin-stat-value">{{ stats.done }}</div>
         </div>
-    </div>
+    </section>
 
-    {% if messages %}
-        <div class="support-list">
+    <!-- Список сообщений -->
+    <section class="admin-section">
+        {% if messages %}
             {% for m in messages %}
-            <article class="support-item-card">
-                <div class="support-item-main">
-                    <div class="support-item-header">
-                        <div class="support-item-title">
-                            {{ m.subject or "Без темы" }}
-                        </div>
-                        <div class="support-item-meta">
-                            От:
-                            {{ m.user.username }}
-                            ({{ m.user.email }})
-                            · {{ m.created_at.strftime("%d.%m.%Y %H:%M") }}
-                        </div>
+            <article class="support-card {% if m.status == 'new' %}support-card-new{% endif %}">
+                <header class="support-card-header">
+                    <div class="support-card-title">{{ m.subject }}</div>
+                    <div class="support-card-meta">
+                        От: {{ m.user.username }} ({{ m.user.email }}) ·
+                        {{ m.created_at.strftime("%d.%m.%Y %H:%M") }}
                     </div>
+                </header>
 
-                    <p class="support-item-text">
-                        {{ m.text }}
-                    </p>
-
-                    {% if m.admin_reply %}
-                        <div class="support-item-reply">
-                            <div class="support-item-reply-label">
-                                Ответ администратора:
-                            </div>
-                            <p>{{ m.admin_reply }}</p>
-                        </div>
-                    {% endif %}
+                <div class="support-card-body">
+                    <div class="support-card-label">Сообщение:</div>
+                    <p class="support-card-text">{{ m.text }}</p>
                 </div>
 
-                <div class="support-item-side">
-                    <div class="support-status-pill
-                        {% if m.status == 'new' %}status-new
-                        {% elif m.status == 'done' %}status-done
-                        {% endif %}">
-                        {% if m.status == 'new' %}Новое{% else %}Обработано{% endif %}
+                {% if m.admin_reply %}
+                    <div class="support-card-reply-block">
+                        <div class="support-card-label">Ответ администратора:</div>
+                        <p class="support-card-reply-text">{{ m.admin_reply }}</p>
+                    </div>
+                {% else %}
+                    <!-- Форма ответа админа -->
+                    <form method="post"
+                          action="{{ url_for('admin_support_reply', msg_id=m.id) }}"
+                          class="support-reply-form">
+                        <label class="support-card-label" for="reply-{{ m.id }}">
+                            Ответ администратора:
+                        </label>
+                        <textarea id="reply-{{ m.id }}"
+                                  name="reply_text"
+                                  rows="2"
+                                  class="support-reply-textarea"
+                                  placeholder="Написать ответ пользователю..."></textarea>
+                        <div class="support-actions-row">
+                            <button type="submit" class="btn btn-primary support-reply-btn">
+                                Отправить ответ
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+
+                <footer class="support-card-footer">
+                    <div class="support-status">
+                        {% if m.status == 'new' %}
+                            <span class="badge badge-orange">Новое</span>
+                        {% else %}
+                            <span class="badge badge-green">Обработано</span>
+                        {% endif %}
                     </div>
 
-                    <div class="support-item-actions">
-                        <!-- Кнопка ОТВЕТИТЬ -->
-                        <button type="button"
-                                class="btn btn-outline admin-reply-btn"
-                                data-id="{{ m.id }}"
-                                data-user="{{ m.user.username }}"
-                                data-subject="{{ m.subject or '' }}">
-                            Ответить
-                        </button>
-
-                        <!-- Кнопка ПОМЕТИТЬ КАК ОБРАБОТАННОЕ -->
-                        {% if m.status != 'done' %}
+                    <div class="support-footer-actions">
+                        {% if m.status == 'new' %}
                         <form method="post"
-                              action="{{ url_for('close_support', msg_id=m.id) }}">
-                            <button type="submit"
-                                    class="btn btn-success support-done-btn">
+                              action="{{ url_for('close_support', msg_id=m.id) }}"
+                              class="inline-form">
+                            <button type="submit" class="btn btn-outline">
                                 Пометить как обработанное
                             </button>
                         </form>
                         {% endif %}
                     </div>
-                </div>
+                </footer>
             </article>
             {% endfor %}
-        </div>
-    {% else %}
-        <p>Сообщений пока нет.</p>
-    {% endif %}
-</section>
-
-<!-- Модальное окно ответа -->
-<div class="admin-modal" id="reply-modal">
-    <div class="admin-modal-backdrop" id="reply-backdrop"></div>
-    <div class="admin-modal-window">
-        <div class="admin-modal-header">
-            <h2 id="reply-modal-title">Ответ пользователю</h2>
-            <button type="button" class="admin-modal-close" id="reply-close">×</button>
-        </div>
-
-        <form id="reply-form" method="post">
-            <div class="admin-modal-body">
-                <div class="admin-modal-info" id="reply-info"></div>
-                <textarea name="reply_text"
-                          class="admin-modal-textarea"
-                          placeholder="Введите текст ответа"
-                          required></textarea>
-            </div>
-
-            <div class="admin-modal-footer">
-                <button type="submit" class="btn btn-primary">
-                    Отправить
-                </button>
-                <button type="button" class="btn btn-outline" id="reply-cancel">
-                    Отмена
-                </button>
-            </div>
-        </form>
-    </div>
+        {% else %}
+            <p class="admin-empty">
+                Обращений пока нет. Как только пользователи напишут в поддержку, они появятся здесь.
+            </p>
+        {% endif %}
+    </section>
 </div>
 
 <style>
-.support-list {
-    margin-top: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-.support-item-card {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    background: #fff;
-    border-radius: 18px;
-    padding: 14px 16px;
-    box-shadow: 0 12px 30px rgba(15,23,42,.06);
-}
-.support-item-main {
-    flex: 1 1 auto;
-}
-.support-item-header {
-    margin-bottom: 6px;
-}
-.support-item-title {
-    font-weight: 600;
-    font-size: 15px;
-    margin-bottom: 2px;
-}
-.support-item-meta {
-    font-size: 12px;
-    color: #6b7280;
-}
-.support-item-text {
-    font-size: 14px;
-    margin: 6px 0 4px;
-}
-.support-item-reply {
-    margin-top: 8px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    background: #f9fafb;
-    font-size: 13px;
-}
-.support-item-reply-label {
-    font-weight: 600;
-    margin-bottom: 3px;
-}
-.support-item-side {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-}
-.support-status-pill {
-    font-size: 12px;
-    padding: 3px 10px;
-    border-radius: 999px;
-}
-.status-new {
-    background: #fef3c7;
-    color: #92400e;
-}
-.status-done {
-    background: #dcfce7;
-    color: #166534;
-}
-.support-item-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.support-done-btn {
-    font-size: 12px;
-    padding: 5px 10px;
-}
+    .admin-page { padding: 8px 24px 32px; }
 
-/* Модалка */
-.admin-modal {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-}
-.admin-modal.open {
-    display: flex;
-}
-.admin-modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(15,23,42,.35);
-}
-.admin-modal-window {
-    position: relative;
-    background: #fff;
-    border-radius: 18px;
-    padding: 14px 16px 12px;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: 0 20px 50px rgba(15,23,42,.4);
-    z-index: 51;
-}
-.admin-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-.admin-modal-close {
-    border: none;
-    background: transparent;
-    font-size: 20px;
-    cursor: pointer;
-}
-.admin-modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 10px;
-}
-.admin-modal-info {
-    font-size: 13px;
-    color: #6b7280;
-}
-.admin-modal-textarea {
-    width: 100%;
-    min-height: 120px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 8px 10px;
-    font-size: 14px;
-    resize: vertical;
-}
-.admin-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
+    .admin-page-header { margin-bottom: 14px; }
+    .admin-page-title {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+    .admin-page-subtitle {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .admin-cards-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .admin-stat-card {
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+    }
+    .admin-stat-card-orange { border-left: 4px solid #f97316; }
+    .admin-stat-card-green  { border-left: 4px solid #22c55e; }
+
+    .admin-stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 2px;
+    }
+    .admin-stat-value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .admin-section { margin-top: 8px; }
+
+    .support-card {
+        margin-bottom: 14px;
+        padding: 14px 16px 12px;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 12px 28px rgba(148,163,184,0.28);
+    }
+    .support-card-new {
+        box-shadow: 0 16px 34px rgba(251,146,60,0.35);
+    }
+
+    .support-card-header {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+    .support-card-title {
+        font-weight: 700;
+        font-size: 16px;
+    }
+    .support-card-meta {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .support-card-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+    .support-card-text {
+        font-size: 14px;
+        margin: 0 0 8px;
+        color: #374151;
+    }
+
+    .support-card-reply-block {
+        margin-top: 6px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: #f1f5f9;
+    }
+    .support-card-reply-text {
+        margin: 2px 0 0;
+        font-size: 14px;
+        color: #111827;
+    }
+
+    .support-reply-form {
+        margin-top: 8px;
+    }
+    .support-reply-textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        padding: 8px 10px;
+        font-size: 13px;
+        resize: vertical;
+        min-height: 60px;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .support-reply-textarea:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(129,140,248,0.25);
+    }
+
+    .support-actions-row {
+        margin-top: 6px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .support-card-footer {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .support-footer-actions .btn.btn-outline {
+        padding: 5px 10px;
+        font-size: 12px;
+        border-radius: 999px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: #e5e7eb;
+        color: #374151;
+    }
+    .badge-orange { background: #ffedd5; color: #c2410c; }
+    .badge-green  { background: #dcfce7; color: #166534; }
+
+    .admin-empty {
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 10px;
+    }
+
+    .admin-flash-wrapper {
+        margin-bottom: 12px;
+    }
+    .admin-flash {
+        border-radius: 14px;
+        padding: 8px 11px;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    .admin-flash-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .admin-flash-error {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    @media (max-width: 900px) {
+        .admin-cards-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
 </style>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const modal   = document.getElementById("reply-modal");
-    const backdrop = document.getElementById("reply-backdrop");
-    const closeBtn = document.getElementById("reply-close");
-    const cancelBtn = document.getElementById("reply-cancel");
-    const form    = document.getElementById("reply-form");
-    const infoBox = document.getElementById("reply-info");
-
-    // шаблон URL: /admin/support/reply/0 -> заменяем 0 на id
-    const baseAction = "{{ url_for('admin_support_reply', msg_id=0) }}";
-
-    function openModal(id, user, subject) {
-        form.action = baseAction.replace("0", id);
-        infoBox.textContent = `Пользователь: ${user} · Тема: ${subject || "Без темы"}`;
-        modal.classList.add("open");
-    }
-
-    function closeModal() {
-        modal.classList.remove("open");
-        form.reset();
-    }
-
-    document.querySelectorAll(".admin-reply-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
-            const user = btn.dataset.user || "пользователь";
-            const subject = btn.dataset.subject || "";
-            openModal(id, user, subject);
-        });
-    });
-
-    [backdrop, closeBtn, cancelBtn].forEach(el => {
-        if (el) el.addEventListener("click", closeModal);
-    });
-});
-</script>
 {% endblock %}

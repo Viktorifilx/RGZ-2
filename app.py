@@ -1,16 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import (
+    Flask, render_template, request,
+    redirect, url_for, session, flash, make_response
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-import os
 from datetime import datetime
 from functools import wraps
+import os
+from sqlalchemy import or_, inspect, text
 
 app = Flask(__name__)
 
-# секретный ключ для сессий и flash-сообщений
+# ключ сессии
 app.secret_key = "super_secret_key_change_me"
 
-# --------- Абсолютный путь к БД ---------
+# путь к БД
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database", "fair.db")
 DB_URI = "sqlite:///" + DB_PATH.replace("\\", "/")
@@ -20,67 +24,93 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
+# ===== МОДЕЛИ =====
 
-# ---------- МОДЕЛИ ----------
 
 class Street(db.Model):
-    __tablename__ = 'streets'
+    __tablename__ = "streets"
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
-    code = db.Column(db.String(50), nullable=False, unique=True)  # it / design / study / photo и т.п.
+    code = db.Column(db.String(50), nullable=False, unique=True)
+
+    # улица → павильоны
+    pavilions = db.relationship("Pavilion", backref="street", lazy="select")
 
 
 class Pavilion(db.Model):
-    __tablename__ = 'pavilions'
+    __tablename__ = "pavilions"
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    street_id = db.Column(db.Integer, db.ForeignKey("streets.id"), nullable=False)
     description = db.Column(db.Text, nullable=True)
 
-    street_id = db.Column(db.Integer, db.ForeignKey('streets.id'), nullable=False)
-    street = db.relationship('Street', backref='pavilions')
+    # павильон → объявления
+    ads = db.relationship("Ad", backref="pavilion", lazy="select")
 
 
 class Ad(db.Model):
-    __tablename__ = 'ads'
+    __tablename__ = "ads"
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(250), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
     text = db.Column(db.Text, nullable=False)
-    author_name = db.Column(db.String(120), nullable=False)
-    master_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
+    # запасное имя
+    author_name = db.Column(db.String(120))
 
-    pavilion_id = db.Column(db.Integer, db.ForeignKey('pavilions.id'), nullable=False)
-    pavilion = db.relationship('Pavilion', backref='ads')
+    pavilion_id = db.Column(
+        db.Integer,
+        db.ForeignKey("pavilions.id"),
+        nullable=False,
+    )
+
+    # мастер из users
+    master_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=True,
+    )
+
+    master = db.relationship("User", foreign_keys=[master_id])
+
+    @property
+    def master_display_name(self):
+        if self.master and self.master.username:
+            return self.master.username
+        if self.author_name:
+            return self.author_name
+        return "Мастер"
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), nullable=False)          # логин / ник
+    username = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)          # тут лежит ХЕШ
-    role = db.Column(db.String(20), nullable=False, default="user")  # user / master / admin
-
+    password = db.Column(db.String(200), nullable=False)  # тут хеш
+    role = db.Column(db.String(20), nullable=False, default="user")  # user/master/admin
 
 
 class StreetRequest(db.Model):
-    __tablename__ = 'street_requests'
+    __tablename__ = "street_requests"
+
     id = db.Column(db.Integer, primary_key=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('User', backref='street_requests')
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("User", backref="street_requests")
 
     street_name = db.Column(db.String(120), nullable=False)
     street_code = db.Column(db.String(50), nullable=False)
     pavilion_title = db.Column(db.String(150), nullable=False)
     pavilion_desc = db.Column(db.Text, nullable=True)
 
-    status = db.Column(db.String(20), nullable=False, default="pending")  # pending / approved / rejected
+    status = db.Column(db.String(20), nullable=False, default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # если заявка одобрена, сюда можно записать id созданной улицы
-    street_id = db.Column(db.Integer, db.ForeignKey('streets.id'), nullable=True)
+    street_id = db.Column(db.Integer, db.ForeignKey("streets.id"), nullable=True)
 
 
 class AdRequest(db.Model):
@@ -97,24 +127,26 @@ class AdRequest(db.Model):
     title = db.Column(db.String(250), nullable=False)
     text = db.Column(db.Text, nullable=False)
 
-    status = db.Column(db.String(20), nullable=False, default="pending")  # pending / approved / rejected
+    status = db.Column(db.String(20), nullable=False, default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 class SupportMessage(db.Model):
-    __tablename__ = 'support_messages'
+    __tablename__ = "support_messages"
+
     id = db.Column(db.Integer, primary_key=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('User', backref='support_messages')
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("User", backref="support_messages")
 
     subject = db.Column(db.String(200), nullable=False)
     text = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(20), nullable=False, default="new")  # new / done
+    status = db.Column(db.String(20), nullable=False, default="new")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # НОВОЕ:
-    admin_reply = db.Column(db.Text, nullable=True)          # текст ответа админа
-    replied_at = db.Column(db.DateTime, nullable=True) 
+    admin_reply = db.Column(db.Text, nullable=True)
+    replied_at = db.Column(db.DateTime, nullable=True)
+
 
 class AdMessage(db.Model):
     __tablename__ = "ad_messages"
@@ -125,48 +157,217 @@ class AdMessage(db.Model):
     receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    is_read = db.Column(db.Boolean, default=False)
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
 
 
+class PavilionRequest(db.Model):
+    __tablename__ = "pavilion_requests"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("User", backref="pavilion_requests")
+
+    street_id = db.Column(db.Integer, db.ForeignKey("streets.id"), nullable=False)
+    street = db.relationship("Street", backref="pavilion_requests")
+
+    # старое поле title
+    title = db.Column(db.String(200), nullable=False, default="")
+
+    pavilion_title = db.Column(db.String(150), nullable=True)
+    pavilion_desc = db.Column(db.Text, nullable=True)
+
+    ad_title = db.Column(db.String(250), nullable=True)
+    ad_text = db.Column(db.Text, nullable=True)
+
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ---------- СОЗДАНИЕ ТАБЛИЦ ----------
+# ===== СОЗДАНИЕ ТАБЛИЦ И МИГРАЦИЯ =====
 
 with app.app_context():
     db.create_all()
 
+with app.app_context():
+    insp = inspect(db.engine)
+    if "pavilion_requests" in insp.get_table_names():
+        cols = [c["name"] for c in insp.get_columns("pavilion_requests")]
 
-# ---------- ВСПОМОГАТЕЛЬНОЕ ----------
+        if "pavilion_title" not in cols:
+            db.session.execute(
+                text(
+                    "ALTER TABLE pavilion_requests "
+                    "ADD COLUMN pavilion_title VARCHAR(150)"
+                )
+            )
+
+        if "pavilion_desc" not in cols:
+            db.session.execute(
+                text(
+                    "ALTER TABLE pavilion_requests "
+                    "ADD COLUMN pavilion_desc TEXT"
+                )
+            )
+
+        if "ad_title" not in cols:
+            db.session.execute(
+                text(
+                    "ALTER TABLE pavilion_requests "
+                    "ADD COLUMN ad_title VARCHAR(250)"
+                )
+            )
+
+        if "ad_text" not in cols:
+            db.session.execute(
+                text(
+                    "ALTER TABLE pavilion_requests "
+                    "ADD COLUMN ad_text TEXT"
+                )
+            )
+
+        db.session.commit()
+
+
+# ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
 
 def get_student_info():
     return "Филатова Виктория", "ФБИ-34"
 
 
+def recalc_unread_total():
+    """Счётчик непрочитанных сообщений по объявлениям."""
+    if "user_id" not in session:
+        session["unread_total"] = 0
+        return
+
+    user_id = session["user_id"]
+    role = session.get("user_role")
+
+    # мастер
+    if role == "master":
+        ads = Ad.query.filter_by(master_id=user_id).all()
+        if not ads:
+            session["unread_total"] = 0
+            return
+
+        ad_ids = [a.id for a in ads]
+
+        unread_total = AdMessage.query.filter(
+            AdMessage.ad_id.in_(ad_ids),
+            AdMessage.receiver_id == user_id,
+            AdMessage.is_read.is_(False),
+        ).count()
+        session["unread_total"] = unread_total
+        return
+
+    # обычный пользователь
+    unread_total = AdMessage.query.filter_by(
+        receiver_id=user_id,
+        is_read=False,
+    ).count()
+    session["unread_total"] = unread_total
+
+
+def recalc_support_badge():
+    """Счётчики по поддержке."""
+    if "user_id" not in session:
+        session["support_unread"] = 0
+        session["admin_support_new"] = 0
+        return
+
+    role = session.get("user_role")
+
+    # админ
+    if role == "admin":
+        session["support_unread"] = 0
+        session["admin_support_new"] = SupportMessage.query.filter_by(
+            status="new"
+        ).count()
+        return
+
+    # пользователь / мастер
+    user_id = session["user_id"]
+
+    last_seen_str = session.get("support_seen_at")
+    last_seen = None
+    if last_seen_str:
+        try:
+            last_seen = datetime.fromisoformat(last_seen_str)
+        except ValueError:
+            last_seen = None
+
+    q = SupportMessage.query.filter_by(user_id=user_id)
+    q = q.filter(SupportMessage.admin_reply.isnot(None))
+    q = q.filter(SupportMessage.replied_at.isnot(None))
+
+    if last_seen is not None:
+        q = q.filter(SupportMessage.replied_at > last_seen)
+
+    session["support_unread"] = q.count()
+
+
+def recalc_admin_counters():
+    """Счётчики для админа."""
+    if session.get("user_role") != "admin":
+        session["admin_requests"] = 0
+        session["admin_support_new"] = 0
+        return
+
+    pending_ads = AdRequest.query.filter_by(status="pending").count()
+    pending_pav = PavilionRequest.query.filter_by(status="pending").count()
+    pending_streets = StreetRequest.query.filter_by(status="pending").count()
+
+    session["admin_requests"] = pending_ads + pending_pav + pending_streets
+    session["admin_support_new"] = SupportMessage.query.filter_by(
+        status="new"
+    ).count()
+
+
+@app.before_request
+def auto_update_unread():
+    """Обновление счётчиков перед каждым запросом."""
+    if "user_id" in session:
+        recalc_unread_total()
+        recalc_support_badge()
+        recalc_admin_counters()
+    else:
+        session["unread_total"] = 0
+        session["support_unread"] = 0
+        session["admin_support_new"] = 0
+        session["admin_requests"] = 0
+
+
 def login_required(view_func):
+    """Защита входом."""
     @wraps(view_func)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
-            flash("Нужно войти на сайт, чтобы продолжить.", "error")
+            flash("Нужно войти на сайт.", "error")
             return redirect(url_for("login"))
         return view_func(*args, **kwargs)
+
     return wrapped
 
 
 def admin_required(view_func):
+    """Только админ."""
     @wraps(view_func)
     def wrapped(*args, **kwargs):
         if session.get("user_role") != "admin":
             flash("Доступ только для администратора.", "error")
             return redirect(url_for("index"))
         return view_func(*args, **kwargs)
+
     return wrapped
 
 
-# ---------- МАРШРУТЫ САЙТА (ПОЛЬЗОВАТЕЛЬ) ----------
+# ===== ПОЛЬЗОВАТЕЛЬСКИЕ СТРАНИЦЫ =====
+
 
 @app.route("/")
 def index():
-    # если админ — отправляем в админку
     if session.get("user_role") == "admin":
         return redirect(url_for("admin_dashboard"))
 
@@ -179,14 +380,16 @@ def index():
         streets=streets,
         featured_ads=featured_ads,
         fio=fio,
-        group=group
+        group=group,
     )
 
 
 @app.route("/street/<code>")
 def street_page(code):
     street = Street.query.filter_by(code=code).first_or_404()
-    pavilions = Pavilion.query.filter_by(street_id=street.id).order_by(Pavilion.id).all()
+    pavilions = Pavilion.query.filter_by(street_id=street.id).order_by(
+        Pavilion.id
+    ).all()
 
     fio, group = get_student_info()
     return render_template(
@@ -194,7 +397,7 @@ def street_page(code):
         street=street,
         pavilions=pavilions,
         fio=fio,
-        group=group
+        group=group,
     )
 
 
@@ -209,11 +412,12 @@ def pavilion_page(pavilion_id):
         pavilion=pavilion,
         ads=ads,
         fio=fio,
-        group=group
+        group=group,
     )
 
 
-# ---------- ПРЕДЛОЖИТЬ ОБЪЯВЛЕНИЕ В ПАВИЛЬОН ----------
+# ===== ЗАЯВКА НА ОБЪЯВЛЕНИЕ В ПАВИЛЬОН =====
+
 
 @app.route("/pavilion/<int:pavilion_id>/offer", methods=["GET", "POST"])
 @login_required
@@ -221,7 +425,6 @@ def offer_ad(pavilion_id):
     fio, group = get_student_info()
     pavilion = Pavilion.query.get_or_404(pavilion_id)
 
-    # только мастера и админ
     if session.get("user_role") not in ("master", "admin"):
         flash("Предлагать объявления могут только мастера.", "error")
         return redirect(url_for("pavilion_page", pavilion_id=pavilion_id))
@@ -244,11 +447,12 @@ def offer_ad(pavilion_id):
                 pavilion_id=pavilion.id,
                 title=form["title"],
                 text=form["text"],
-                status="pending"
+                status="pending",
             )
             db.session.add(req)
             db.session.commit()
 
+            recalc_admin_counters()
             flash("Заявка на объявление отправлена администратору.", "success")
             return redirect(url_for("pavilion_page", pavilion_id=pavilion.id))
 
@@ -258,7 +462,7 @@ def offer_ad(pavilion_id):
         form=form,
         errors=errors,
         fio=fio,
-        group=group
+        group=group,
     )
 
 
@@ -266,20 +470,10 @@ def offer_ad(pavilion_id):
 def ad_page(ad_id):
     ad = Ad.query.get_or_404(ad_id)
     fio, group = get_student_info()
-    return render_template(
-        "ad.html",
-        ad=ad,
-        fio=fio,
-        group=group
-    )
+    return render_template("ad.html", ad=ad, fio=fio, group=group)
 
 
-# ---------- АВТОРИЗАЦИЯ / РЕГИСТРАЦИЯ ----------
-
-
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-# ... остальной код и модели
+# ===== РЕГИСТРАЦИЯ / ВХОД =====
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -306,19 +500,16 @@ def register():
                 username=username,
                 email=email,
                 password=generate_password_hash(password),
-                role=role
+                role=role,
             )
             db.session.add(user)
             db.session.commit()
-            # после успешной регистрации — на страницу входа
+
+            flash("Аккаунт создан. Можно войти.", "success")
             return redirect(url_for("login"))
 
     return render_template("register.html", errors=errors)
 
-
-
-from flask import render_template, request, redirect, url_for, session
-from werkzeug.security import check_password_hash
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -333,29 +524,27 @@ def login():
         if user is None:
             errors.append("Пользователь с таким логином не найден.")
         else:
-            # пробуем как с хешём (нормальный путь)
             ok = False
             try:
                 if check_password_hash(user.password, password):
                     ok = True
             except ValueError:
-                # на всякий случай — если в базе вдруг лежит голый пароль
                 if user.password == password:
                     ok = True
 
             if not ok:
                 errors.append("Неверный пароль.")
 
-        if not errors and user:
-            session["user_id"] = user.id
-            session["username"] = user.username
-            session["user_role"] = user.role
-            return redirect(url_for("index"))
+            if not errors and user:
+                session["user_id"] = user.id
+                session["username"] = user.username
+                session["user_role"] = user.role
+
+                recalc_unread_total()
+                recalc_support_badge()
+                return redirect(url_for("index"))
 
     return render_template("login.html", errors=errors)
-
-
-
 
 
 @app.route("/logout")
@@ -364,12 +553,14 @@ def logout():
     return redirect(url_for("index"))
 
 
-# ---------- СТРАНИЦА "КАК УСТРОЕНА ЯРМАРКА" ----------
+# ===== ПРОСТЫЕ СТРАНИЦЫ =====
+
 
 @app.route("/how-it-works")
 def how_it_works():
     fio, group = get_student_info()
     return render_template("how_it_works.html", fio=fio, group=group)
+
 
 @app.route("/about")
 def about():
@@ -377,15 +568,14 @@ def about():
     return render_template("about.html", fio=fio, group=group)
 
 
+# ===== ЗАЯВКА НА НОВУЮ УЛИЦУ =====
 
-# ---------- ЗАПРОС НОВОЙ УЛИЦЫ ----------
 
 @app.route("/street/request", methods=["GET", "POST"])
 @login_required
 def request_street():
     fio, group = get_student_info()
 
-    # только мастера и админ могут предлагать новые улицы
     if session.get("user_role") not in ("master", "admin"):
         flash("Предлагать новые улицы могут только мастера.", "error")
         return redirect(url_for("index"))
@@ -407,17 +597,17 @@ def request_street():
         if not form["street_name"]:
             errors.append("Введите название улицы.")
         if not form["street_code"]:
-            errors.append("Укажите код улицы латиницей (например: techno_help).")
+            errors.append("Укажите код улицы латиницей.")
         else:
             cleaned = form["street_code"].replace("_", "")
             if not cleaned.isalnum() or not form["street_code"].islower():
                 errors.append(
-                    "Код можно только строчными латинскими буквами, цифрами и подчёркиваниями."
+                    "Код только строчными латинскими буквами, цифрами и подчёркиваниями."
                 )
             else:
                 exists = Street.query.filter_by(code=form["street_code"]).first()
                 if exists:
-                    errors.append("Такой код улицы уже занят, попробуйте другой.")
+                    errors.append("Такой код улицы уже занят.")
 
         if not form["pavilion_title"]:
             errors.append("Введите название первого павильона.")
@@ -429,12 +619,13 @@ def request_street():
                 street_code=form["street_code"],
                 pavilion_title=form["pavilion_title"],
                 pavilion_desc=form["pavilion_desc"],
-                status="pending"
+                status="pending",
             )
             db.session.add(req)
             db.session.commit()
 
-            flash("Заявка отправлена администратору. После одобрения улица появится на ярмарке.", "success")
+            recalc_admin_counters()
+            flash("Заявка на улицу отправлена администратору.", "success")
             return redirect(url_for("index"))
 
     return render_template(
@@ -442,11 +633,12 @@ def request_street():
         fio=fio,
         group=group,
         form=form,
-        errors=errors
+        errors=errors,
     )
 
 
-# ---------- ПОДДЕРЖКА ----------
+# ===== ПОДДЕРЖКА =====
+
 
 @app.route("/support", methods=["GET", "POST"])
 @login_required
@@ -468,28 +660,36 @@ def support():
                 user_id=session["user_id"],
                 subject=subject,
                 text=text,
-                status="new"
+                status="new",
             )
             db.session.add(msg)
             db.session.commit()
+
+            recalc_admin_counters()
             flash("Сообщение отправлено администратору.", "success")
             return redirect(url_for("support"))
 
-    # НОВОЕ: выбираем последние сообщения этого пользователя
-    my_messages = SupportMessage.query.filter_by(
-        user_id=session["user_id"]
-    ).order_by(SupportMessage.created_at.desc()).limit(10).all()
+    my_messages = (
+        SupportMessage.query.filter_by(user_id=session["user_id"])
+        .order_by(SupportMessage.created_at.desc())
+        .limit(10)
+        .all()
+    )
+
+    session["support_seen_at"] = datetime.utcnow().isoformat()
+    recalc_support_badge()
 
     return render_template(
         "support.html",
         fio=fio,
         group=group,
         errors=errors,
-        my_messages=my_messages   # НОВЫЙ параметр в шаблон
+        my_messages=my_messages,
     )
 
 
-# ---------- АДМИН: ГЛАВНАЯ ПАНЕЛЬ ----------
+# ===== АДМИН: ГЛАВНАЯ =====
+
 
 @app.route("/admin")
 @admin_required
@@ -500,17 +700,20 @@ def admin_dashboard():
         "admin_dashboard.html",
         fio=fio,
         group=group,
-        streets=streets
+        streets=streets,
     )
 
 
-# ---------- АДМИН: ЗАЯВКИ НА УЛИЦЫ ----------
+# ===== АДМИН: ЗАЯВКИ НА УЛИЦЫ =====
+
 
 @app.route("/admin/requests")
 @admin_required
 def admin_requests():
     fio, group = get_student_info()
-    requests_list = StreetRequest.query.order_by(StreetRequest.created_at.desc()).all()
+    requests_list = StreetRequest.query.order_by(
+        StreetRequest.created_at.desc()
+    ).all()
 
     stats = {
         "total": len(requests_list),
@@ -524,7 +727,7 @@ def admin_requests():
         fio=fio,
         group=group,
         requests=requests_list,
-        stats=stats
+        stats=stats,
     )
 
 
@@ -544,7 +747,7 @@ def approve_request(req_id):
     pav = Pavilion(
         title=req.pavilion_title,
         description=req.pavilion_desc,
-        street=new_street
+        street=new_street,
     )
     db.session.add(pav)
 
@@ -553,7 +756,8 @@ def approve_request(req_id):
 
     db.session.commit()
 
-    flash("Улица и первый павильон созданы.", "success")
+    recalc_admin_counters()
+    flash("Улица и павильон созданы.", "success")
     return redirect(url_for("street_page", code=new_street.code))
 
 
@@ -567,18 +771,22 @@ def reject_request(req_id):
     else:
         req.status = "rejected"
         db.session.commit()
+        recalc_admin_counters()
         flash("Заявка отклонена.", "info")
 
     return redirect(url_for("admin_requests"))
 
 
-# ---------- АДМИН: СООБЩЕНИЯ В ПОДДЕРЖКУ ----------
+# ===== АДМИН: ПОДДЕРЖКА =====
+
 
 @app.route("/admin/support")
 @admin_required
 def admin_support():
     fio, group = get_student_info()
-    messages = SupportMessage.query.order_by(SupportMessage.created_at.desc()).all()
+    messages = SupportMessage.query.order_by(
+        SupportMessage.created_at.desc()
+    ).all()
 
     stats = {
         "total": len(messages),
@@ -591,7 +799,7 @@ def admin_support():
         fio=fio,
         group=group,
         messages=messages,
-        stats=stats
+        stats=stats,
     )
 
 
@@ -601,11 +809,34 @@ def close_support(msg_id):
     msg = SupportMessage.query.get_or_404(msg_id)
     msg.status = "done"
     db.session.commit()
+
+    recalc_admin_counters()
     flash("Обращение помечено как обработанное.", "success")
     return redirect(url_for("admin_support"))
 
 
-# ---------- АДМИН: УПРАВЛЕНИЕ ПАВИЛЬОНАМИ/ОБЪЯВЛЕНИЯМИ ----------
+@app.route("/admin/support/reply/<int:msg_id>", methods=["POST"])
+@admin_required
+def admin_support_reply(msg_id):
+    msg = SupportMessage.query.get_or_404(msg_id)
+    reply_text = request.form.get("reply_text", "").strip()
+
+    if not reply_text:
+        flash("Нельзя отправить пустой ответ.", "error")
+        return redirect(url_for("admin_support"))
+
+    msg.admin_reply = reply_text
+    msg.replied_at = datetime.utcnow()
+    msg.status = "done"
+    db.session.commit()
+
+    recalc_admin_counters()
+    flash("Ответ отправлен и сохранён.", "success")
+    return redirect(url_for("admin_support"))
+
+
+# ===== АДМИН: ПАВИЛЬОНЫ И ОБЪЯВЛЕНИЯ =====
+
 
 @app.route("/admin/pavilion/<int:pavilion_id>/clear", methods=["POST"])
 @admin_required
@@ -646,27 +877,47 @@ def admin_delete_ad(ad_id):
     return redirect(url_for("pavilion_page", pavilion_id=pavilion_id))
 
 
-# ---------- АДМИН: ЗАЯВКИ НА ОБЪЯВЛЕНИЯ ----------
+@app.route("/admin/delete-ad/<int:ad_id>", methods=["POST"])
+@admin_required
+def admin_delete_ad_legacy(ad_id):
+    return admin_delete_ad(ad_id)
+
+
+# ===== АДМИН: ЗАЯВКИ НА ОБЪЯВЛЕНИЯ И ПАВИЛЬОНЫ =====
+
 
 @app.route("/admin/ad-requests")
 @admin_required
 def admin_ad_requests():
     fio, group = get_student_info()
-    requests_list = AdRequest.query.order_by(AdRequest.created_at.desc()).all()
 
-    stats = {
-        "total": len(requests_list),
-        "pending": sum(1 for r in requests_list if r.status == "pending"),
-        "approved": sum(1 for r in requests_list if r.status == "approved"),
-        "rejected": sum(1 for r in requests_list if r.status == "rejected"),
+    ad_requests = AdRequest.query.order_by(AdRequest.created_at.desc()).all()
+    pav_requests = PavilionRequest.query.order_by(
+        PavilionRequest.created_at.desc()
+    ).all()
+
+    stats_ads = {
+        "total": len(ad_requests),
+        "pending": sum(1 for r in ad_requests if r.status == "pending"),
+        "approved": sum(1 for r in ad_requests if r.status == "approved"),
+        "rejected": sum(1 for r in ad_requests if r.status == "rejected"),
+    }
+
+    stats_pav = {
+        "total": len(pav_requests),
+        "pending": sum(1 for r in pav_requests if r.status == "pending"),
+        "approved": sum(1 for r in pav_requests if r.status == "approved"),
+        "rejected": sum(1 for r in pav_requests if r.status == "rejected"),
     }
 
     return render_template(
         "admin_ad_requests.html",
         fio=fio,
         group=group,
-        requests=requests_list,
-        stats=stats
+        ad_requests=ad_requests,
+        pav_requests=pav_requests,
+        stats_ads=stats_ads,
+        stats_pav=stats_pav,
     )
 
 
@@ -683,14 +934,16 @@ def admin_approve_ad_request(req_id):
         title=req.title,
         text=req.text,
         author_name=req.user.username,
-        pavilion_id=req.pavilion_id
+        pavilion_id=req.pavilion_id,
+        master_id=req.user_id,
     )
     db.session.add(ad)
 
     req.status = "approved"
     db.session.commit()
 
-    flash("Объявление опубликовано в павильоне.", "success")
+    recalc_admin_counters()
+    flash("Объявление опубликовано.", "success")
     return redirect(url_for("pavilion_page", pavilion_id=req.pavilion_id))
 
 
@@ -704,90 +957,248 @@ def admin_reject_ad_request(req_id):
     else:
         req.status = "rejected"
         db.session.commit()
+        recalc_admin_counters()
         flash("Заявка на объявление отклонена.", "info")
 
     return redirect(url_for("admin_ad_requests"))
 
 
-@app.route("/admin/support/reply/<int:msg_id>", methods=["POST"])
-@admin_required
-def admin_support_reply(msg_id):
-    msg = SupportMessage.query.get_or_404(msg_id)
-    reply_text = request.form.get("reply_text", "").strip()
+# ===== СООБЩЕНИЯ МАСТЕРА ПО ОБЪЯВЛЕНИЯМ =====
 
-    if not reply_text:
-        flash("Нельзя отправить пустой ответ.", "error")
-        return redirect(url_for("admin_support"))
 
-    msg.admin_reply = reply_text
-    msg.replied_at = datetime.utcnow()
-    msg.status = "done"          # помечаем как обработанное
-    db.session.commit()
-
-    flash("Ответ отправлен и сохранён в обращении.", "success")
-    return redirect(url_for("admin_support"))
-
-@app.route("/ad/<int:ad_id>/chat", methods=["GET", "POST"])
-def ad_chat(ad_id):
-    # 1. Проверяем, что пользователь авторизован
+@app.route("/ad/messages")
+def ad_messages():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
     user_id = session["user_id"]
 
-    # 2. Получаем объявление
-    ad = Ad.query.get_or_404(ad_id)
+    if session.get("user_role") != "master":
+        flash("Страница сообщений доступна только мастеру.", "error")
+        return redirect(url_for("index"))
 
-    # 3. Берём мастера из БД.
-    # Если у объявления мастера пока нет (NULL) — временно считаем, что это Кирилл (id=4),
-    # но уже ЧЕРЕЗ БД: в таблице у всех стоит 4.
-    master_id = ad.master_id or 4
+    fio, group = get_student_info()
 
-    # 4. Обработка отправки сообщения
-    if request.method == "POST":
-        text = request.form.get("message", "").strip()
-        if text:
-            # Если пишет обычный пользователь — сообщение идёт мастеру
-            if user_id != master_id:
-                receiver_id = master_id
-            else:
-                # Если пишет мастер — пытаемся ответить последнему "другому" собеседнику
-                last_other = (
-                    AdMessage.query
-                    .filter(
-                        AdMessage.ad_id == ad.id,
-                        AdMessage.sender_id != master_id
-                    )
-                    .order_by(AdMessage.created_at.desc())
-                    .first()
-                )
-                receiver_id = last_other.sender_id if last_other else master_id
+    ads = Ad.query.filter_by(master_id=user_id).all()
+    if not ads:
+        recalc_unread_total()
+        html = render_template("ad_messages.html", items=[], fio=fio, group=group)
+        resp = make_response(html)
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
 
-            msg = AdMessage(
-                ad_id=ad.id,
-                sender_id=user_id,
-                receiver_id=receiver_id,
-                text=text,
-            )
-            db.session.add(msg)
-            db.session.commit()
+    ad_ids = [a.id for a in ads]
+    ad_map = {a.id: a for a in ads}
 
-        return redirect(url_for("ad_chat", ad_id=ad.id))
-
-    # 5. Достаём сообщения по этому объявлению
-    messages = (
-        AdMessage.query
-        .filter_by(ad_id=ad.id)
+    all_msgs = (
+        AdMessage.query.filter(AdMessage.ad_id.in_(ad_ids))
         .order_by(AdMessage.created_at)
         .all()
     )
 
-    # 6. Карта id → имя пользователя, чтобы красиво подписывать отправителей
-    users_map = {}
-    if messages:
-        ids = {m.sender_id for m in messages} | {m.receiver_id for m in messages}
-        users = User.query.filter(User.id.in_(ids)).all()
+    threads = {}
+    client_ids = set()
+
+    for m in all_msgs:
+        if m.sender_id == user_id and m.receiver_id != user_id:
+            client_id = m.receiver_id
+        elif m.receiver_id == user_id and m.sender_id != user_id:
+            client_id = m.sender_id
+        else:
+            continue
+
+        key = (m.ad_id, client_id)
+        if key not in threads:
+            threads[key] = {
+                "ad": ad_map.get(m.ad_id),
+                "client_id": client_id,
+                "unread_count": 0,
+                "last_time": m.created_at,
+            }
+        else:
+            if (
+                m.created_at
+                and threads[key]["last_time"]
+                and m.created_at > threads[key]["last_time"]
+            ):
+                threads[key]["last_time"] = m.created_at
+
+        if m.receiver_id == user_id and not m.is_read:
+            threads[key]["unread_count"] += 1
+
+        client_ids.add(client_id)
+
+    users = User.query.filter(User.id.in_(client_ids)).all() if client_ids else []
+    user_map = {u.id: u.username for u in users}
+
+    items = []
+    total_unread = 0
+    for (ad_id, client_id), data in threads.items():
+        data["client_name"] = user_map.get(client_id, f"ID {client_id}")
+        items.append(data)
+        total_unread += data["unread_count"]
+
+    items.sort(
+        key=lambda x: x["last_time"] or datetime.min,
+        reverse=True,
+    )
+
+    session["unread_total"] = total_unread
+
+    html = render_template("ad_messages.html", items=items, fio=fio, group=group)
+    resp = make_response(html)
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+
+@app.route("/ad/<int:ad_id>/chat", methods=["GET", "POST"])
+def ad_chat(ad_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    ad = Ad.query.get_or_404(ad_id)
+    master_id = ad.master_id
+
+    if master_id is None:
+        flash("У этого объявления ещё не назначен мастер.", "error")
+        return redirect(url_for("ad_page", ad_id=ad.id))
+
+    # пользователь
+    if user_id != master_id:
+        if request.method == "POST":
+            text = request.form.get("message", "").strip()
+            if text:
+                msg = AdMessage(
+                    ad_id=ad.id,
+                    sender_id=user_id,
+                    receiver_id=master_id,
+                    text=text,
+                    is_read=False,
+                )
+                db.session.add(msg)
+                db.session.commit()
+                recalc_unread_total()
+
+            return redirect(url_for("ad_chat", ad_id=ad.id))
+
+        AdMessage.query.filter_by(
+            ad_id=ad.id, receiver_id=user_id, is_read=False
+        ).update({"is_read": True}, synchronize_session=False)
+        db.session.commit()
+        recalc_unread_total()
+
+        messages = (
+            AdMessage.query.filter(
+                AdMessage.ad_id == ad.id,
+                or_(
+                    AdMessage.sender_id == user_id,
+                    AdMessage.receiver_id == user_id,
+                ),
+            )
+            .order_by(AdMessage.created_at)
+            .all()
+        )
+
+        if not messages:
+            messages = (
+                AdMessage.query.filter_by(ad_id=ad.id)
+                .order_by(AdMessage.created_at)
+                .all()
+            )
+
+        user_ids = {m.sender_id for m in messages} | {m.receiver_id for m in messages}
+        users = User.query.filter(User.id.in_(user_ids)).all() if user_ids else []
         users_map = {u.id: u.username for u in users}
+
+        fio, group = get_student_info()
+
+        return render_template(
+            "ad_chat.html",
+            ad=ad,
+            messages=messages,
+            users_map=users_map,
+            current_user_id=user_id,
+            master_id=master_id,
+            fio=fio,
+            group=group,
+        )
+
+    # мастер
+    client_id = request.args.get("client_id", type=int)
+
+    if not client_id:
+        last_msg = (
+            AdMessage.query.filter_by(ad_id=ad.id)
+            .order_by(AdMessage.created_at.desc())
+            .first()
+        )
+        if last_msg:
+            if last_msg.sender_id != master_id:
+                client_id = last_msg.sender_id
+            elif last_msg.receiver_id != master_id:
+                client_id = last_msg.receiver_id
+
+    if not client_id:
+        fio, group = get_student_info()
+        flash("Пока нет сообщений по этому объявлению.", "info")
+        return render_template(
+            "ad_chat.html",
+            ad=ad,
+            messages=[],
+            users_map={},
+            current_user_id=user_id,
+            master_id=master_id,
+            fio=fio,
+            group=group,
+        )
+
+    participants = {master_id, client_id}
+
+    if request.method == "POST":
+        text = request.form.get("message", "").strip()
+        if text:
+            msg = AdMessage(
+                ad_id=ad.id,
+                sender_id=user_id,
+                receiver_id=client_id,
+                text=text,
+                is_read=False,
+            )
+            db.session.add(msg)
+            db.session.commit()
+            recalc_unread_total()
+
+        return redirect(url_for("ad_chat", ad_id=ad.id, client_id=client_id))
+
+    AdMessage.query.filter(
+        AdMessage.ad_id == ad.id,
+        AdMessage.receiver_id == user_id,
+        AdMessage.sender_id == client_id,
+        AdMessage.is_read.is_(False),
+    ).update({"is_read": True}, synchronize_session=False)
+    db.session.commit()
+    recalc_unread_total()
+
+    messages = (
+        AdMessage.query.filter(
+            AdMessage.ad_id == ad.id,
+            AdMessage.sender_id.in_(participants),
+            AdMessage.receiver_id.in_(participants),
+        )
+        .order_by(AdMessage.created_at)
+        .all()
+    )
+
+    user_ids = {m.sender_id for m in messages} | {m.receiver_id for m in messages}
+    users = User.query.filter(User.id.in_(user_ids)).all() if user_ids else []
+    users_map = {u.id: u.username for u in users}
+
+    fio, group = get_student_info()
 
     return render_template(
         "ad_chat.html",
@@ -796,30 +1207,209 @@ def ad_chat(ad_id):
         users_map=users_map,
         current_user_id=user_id,
         master_id=master_id,
+        fio=fio,
+        group=group,
     )
 
 
-# --- страница "Сообщения" для мастера ---
-# --- страница "Сообщения" для мастера ---
-@app.route("/ad/messages")
-def ad_messages():
-    # неавторизованных отправляем на логин
+# ===== СООБЩЕНИЯ ПОЛЬЗОВАТЕЛЯ =====
+
+
+@app.route("/my/messages")
+def user_messages():
+    """Диалоги пользователя с мастерами."""
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    # доступ только для роли master
-    if session.get("user_role") != "master":
+    user_id = session["user_id"]
+
+    if session.get("user_role") != "user":
+        flash("Страница сообщений только для пользователей.", "error")
         return redirect(url_for("index"))
 
-    master_id = session["user_id"]
+    fio, group = get_student_info()
 
-    # все объявления этого мастера (важно: у модели Ad есть поле master_id)
-    ads = Ad.query.filter_by(master_id=master_id).all()
+    all_msgs = (
+        AdMessage.query.filter(
+            (AdMessage.sender_id == user_id) | (AdMessage.receiver_id == user_id)
+        )
+        .order_by(AdMessage.created_at)
+        .all()
+    )
 
-    return render_template("ad_messages.html", ads=ads)
+    if not all_msgs:
+        items = []
+    else:
+        threads = {}
+        ad_ids = set()
+
+        for m in all_msgs:
+            ad_ids.add(m.ad_id)
+
+        ads = Ad.query.filter(Ad.id.in_(ad_ids)).all()
+        ad_map = {a.id: a for a in ads}
+
+        for m in all_msgs:
+            ad = ad_map.get(m.ad_id)
+            if not ad or not ad.master_id:
+                continue
+
+            master_id = ad.master_id
+            key = (m.ad_id, master_id)
+
+            if key not in threads:
+                threads[key] = {
+                    "ad": ad,
+                    "master_id": master_id,
+                    "unread_count": 0,
+                    "last_time": m.created_at,
+                }
+            else:
+                if (
+                    m.created_at
+                    and threads[key]["last_time"]
+                    and m.created_at > threads[key]["last_time"]
+                ):
+                    threads[key]["last_time"] = m.created_at
+
+            if m.receiver_id == user_id and not m.is_read:
+                threads[key]["unread_count"] += 1
+
+        master_ids = {data["master_id"] for data in threads.values()}
+        users = User.query.filter(User.id.in_(master_ids)).all() if master_ids else []
+        master_map = {u.id: u.username for u in users}
+
+        items = []
+        for (ad_id, master_id), data in threads.items():
+            data["master_name"] = master_map.get(master_id, f"ID {master_id}")
+            items.append(data)
+
+        items.sort(
+            key=lambda x: x["last_time"] or datetime.min,
+            reverse=True,
+        )
+
+    return render_template("user_messages.html", items=items, fio=fio, group=group)
 
 
+# ===== ЗАЯВКА НА НОВЫЙ ПАВИЛЬОН =====
 
+
+@app.route("/street/<int:street_id>/pavilion-request", methods=["GET", "POST"])
+@login_required
+def pavilion_request(street_id):
+    """Заявка на новый павильон и первое объявление."""
+    street = Street.query.get_or_404(street_id)
+
+    if session.get("user_role") not in ("master", "admin"):
+        flash("Предлагать новые павильоны могут только мастера.", "error")
+        return redirect(url_for("street_page", code=street.code))
+
+    fio, group = get_student_info()
+    errors = []
+
+    form = {
+        "pavilion_title": "",
+        "pavilion_desc": "",
+        "ad_title": "",
+        "ad_text": "",
+    }
+
+    if request.method == "POST":
+        form["pavilion_title"] = request.form.get("pavilion_title", "").strip()
+        form["pavilion_desc"] = request.form.get("pavilion_desc", "").strip()
+        form["ad_title"] = request.form.get("ad_title", "").strip()
+        form["ad_text"] = request.form.get("ad_text", "").strip()
+
+        if not form["pavilion_title"]:
+            errors.append("Введите название павильона.")
+        if not form["ad_title"]:
+            errors.append("Введите заголовок первого объявления.")
+        if not form["ad_text"]:
+            errors.append("Опишите первое объявление для павильона.")
+
+        if not errors:
+            req = PavilionRequest(
+                user_id=session["user_id"],
+                street_id=street.id,
+                title=form["pavilion_title"],
+                pavilion_title=form["pavilion_title"],
+                pavilion_desc=form["pavilion_desc"],
+                ad_title=form["ad_title"],
+                ad_text=form["ad_text"],
+                status="pending",
+            )
+            db.session.add(req)
+            db.session.commit()
+
+            recalc_admin_counters()
+            flash(
+                "Заявка на павильон и первое объявление отправлена администратору.",
+                "success",
+            )
+            return redirect(url_for("street_page", code=street.code))
+
+    return render_template(
+        "pavilion_request.html",
+        street=street,
+        form=form,
+        errors=errors,
+        fio=fio,
+        group=group,
+    )
+
+
+@app.route("/admin/pavilion-requests/<int:req_id>/approve", methods=["POST"])
+@admin_required
+def admin_approve_pavilion_request(req_id):
+    req = PavilionRequest.query.get_or_404(req_id)
+
+    if req.status != "pending":
+        flash("Эта заявка уже обработана.", "error")
+        return redirect(url_for("admin_ad_requests"))
+
+    pav = Pavilion(
+        title=req.pavilion_title,
+        description=req.pavilion_desc,
+        street_id=req.street_id,
+    )
+    db.session.add(pav)
+    db.session.flush()
+
+    ad = Ad(
+        title=req.ad_title,
+        text=req.ad_text,
+        author_name=req.user.username,
+        pavilion_id=pav.id,
+        master_id=req.user_id,
+    )
+    db.session.add(ad)
+
+    req.status = "approved"
+    db.session.commit()
+
+    recalc_admin_counters()
+    flash("Павильон создан, объявление опубликовано.", "success")
+    return redirect(url_for("pavilion_page", pavilion_id=pav.id))
+
+
+@app.route("/admin/pavilion-requests/<int:req_id>/reject", methods=["POST"])
+@admin_required
+def admin_reject_pavilion_request(req_id):
+    req = PavilionRequest.query.get_or_404(req_id)
+
+    if req.status != "pending":
+        flash("Эта заявка уже обработана.", "error")
+    else:
+        req.status = "rejected"
+        db.session.commit()
+        recalc_admin_counters()
+        flash("Заявка на павильон отклонена.", "info")
+
+    return redirect(url_for("admin_ad_requests"))
+
+
+# ===== ЗАПУСК =====
 
 if __name__ == "__main__":
     app.run(debug=True)

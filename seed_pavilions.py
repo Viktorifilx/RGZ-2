@@ -1,8 +1,6 @@
 from app import app, db, Street, Pavilion, Ad
 
 with app.app_context():
-    # Сначала очищаем павильоны и объявления,
-    # чтобы не было дублей при повторных запусках
     Ad.query.delete()
     Pavilion.query.delete()
     db.session.commit()
@@ -16,7 +14,6 @@ with app.app_context():
             )
         return street
 
-    # Коды берём из ТВОЕГО текущего seed_streets.py
     it = get_street("it", "Техно-улица")
     design = get_street("design", "Арбат творчества")
     study = get_street("study", "Аллея знаний")
@@ -68,7 +65,7 @@ with app.app_context():
         Ad(
             title="Мини-проект на Flask под сдачу",
             text="Сделаем вместе небольшой сайт: авторизация, простая БД, пара страниц.",
-            author_name="Алина",
+            author_name="Анна",
             pavilion=p
         ),
         Ad(
