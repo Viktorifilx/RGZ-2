@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash
 
 
 def create_admin():
-    username = "Администратор"
+    username = "Administrator"
     email = "admin@example.com"      
     password_plain = "12345"         
 
