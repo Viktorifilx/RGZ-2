@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование объявления — {{ ad.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .edit-ad-wrapper {
+        min-height: calc(100vh - 140px);
+        padding: 30px 20px 60px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background:
+            radial-gradient(circle at 0 0, #ffe8ff 0, transparent 55%),
+            radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
+    }
+    .edit-ad-card {
+        max-width: 780px;
+        width: 100%;
+        background: #fff;
+        border-radius: 26px;
+        padding: 22px 24px 22px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+    }
+    .edit-ad-title {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+    .edit-ad-sub {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 18px;
+    }
+    .edit-ad-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .edit-ad-input,
+    .edit-ad-textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        padding: 10px 12px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .edit-ad-textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+    .edit-ad-input:focus,
+    .edit-ad-textarea:focus {
+        border-color: #ff4fd8;
+        box-shadow: 0 0 0 2px rgba(255,79,216,0.16);
+    }
+    .edit-ad-actions {
+        margin-top: 8px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="edit-ad-wrapper">
+    <div class="edit-ad-card">
+        <a href="{{ url_for('ad_page', ad_id=ad.id) }}" class="ad-page-back">← Назад к объявлению</a>
+
+        <h1 class="edit-ad-title">Редактирование объявления</h1>
+        <p class="edit-ad-sub">
+            Обнови заголовок и описание, если хочешь уточнить условия помощи или формат работы.
+        </p>
+
+        {% if errors %}
+            <ul class="error-list">
+                {% for e in errors %}
+                    <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" class="edit-ad-form">
+            <input
+                type="text"
+                name="title"
+                class="edit-ad-input"
+                placeholder="Заголовок объявления"
+                value="{{ form.title }}"
+                required
+            >
+
+            <textarea
+                name="text"
+                class="edit-ad-textarea"
+                placeholder="Подробно опиши, чем ты помогаешь и как всё будет происходить"
+                required
+            >{{ form.text }}</textarea>
+
+            <div class="edit-ad-actions">
+                <button type="submit" class="btn btn-primary">
+                    Сохранить изменения
+                </button>
+                <a href="{{ url_for('ad_page', ad_id=ad.id) }}" class="btn btn-outline">
+                    Отменить
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

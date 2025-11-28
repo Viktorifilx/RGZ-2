@@ -23,7 +23,7 @@
             line-height: 1;
         }
 
-        /* маленькая кнопка удаления аккаунта в шапке */
+        /* Кнопка удаления аккаунта */
         .delete-account-link {
             color: #ef4444;
             border-color: rgba(248, 113, 113, 0.5);
@@ -57,7 +57,10 @@
             </a>
         {% endif %}
 
-        {# Ссылка "Сообщения" для мастера и пользователя #}
+        {% if session.get('user_role') == 'admin' %}
+            <a href="{{ url_for('admin_users') }}">Пользователи</a>
+        {% endif %}
+
         {% if session.get('user_role') == 'master' %}
             <a href="{{ url_for('ad_messages') }}" class="nav-messages-link">
                 Сообщения
@@ -79,8 +82,16 @@
         {% if session.get('user_id') %}
             <span class="user-chip">
                 <span class="user-avatar">
-                    {{ session.get('username', '?')[0] | upper }}
+                    {% if session.get('avatar_filename') %}
+                        <img src="{{ url_for('static',
+                                            filename='uploads/avatars/' ~ session.get('avatar_filename')) }}"
+                             alt="Аватар"
+                             class="user-avatar-img">
+                    {% else %}
+                        {{ session.get('username', '?')[0] | upper }}
+                    {% endif %}
                 </span>
+
                 <span class="user-name">
                     {{ session.get('username', 'Гость') }}
                     {% if session.get('user_role') == 'master' %}
@@ -90,19 +101,15 @@
                     {% endif %}
                 </span>
             </span>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline">
-                Выйти
-            </a>
+
+            <a href="{{ url_for('logout') }}" class="btn btn-outline">Выйти</a>
             <a href="{{ url_for('delete_account') }}" class="btn btn-ghost delete-account-link">
                 Удалить аккаунт
             </a>
+
         {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-outline">
-                Войти
-            </a>
-            <a href="{{ url_for('register') }}" class="btn btn-primary">
-                Регистрация
-            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline">Войти</a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Регистрация</a>
         {% endif %}
     </div>
 </header>

@@ -1,0 +1,313 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Пользователи — Admin{% endblock %}
+
+{% block content %}
+<style>
+    .admin-wrapper {
+        min-height: calc(100vh - 140px);
+        padding: 30px 20px 60px;
+        background:
+            radial-gradient(circle at 0 0, #ffe8ff 0, transparent 55%),
+            radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
+    }
+
+    .admin-card {
+        max-width: 980px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 22px 26px 24px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    .admin-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .admin-title {
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .admin-subtitle {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-top: 6px;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 8px 10px;
+        text-align: left;
+    }
+
+    .users-table thead th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #9ca3af;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .users-table tbody tr:nth-child(odd) {
+        background: #f9fafb;
+    }
+
+    .users-table tbody tr:nth-child(even) {
+        background: #ffffff;
+    }
+
+    .user-role-badge {
+        display: inline-flex;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .user-role-user {
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .user-role-master {
+        background: #ecfdf5;
+        color: #16a34a;
+    }
+
+    .user-role-admin {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .user-delete-btn {
+        border: none;
+        background: #fee2e2;
+        color: #b91c1c;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background .15s, transform .1s, box-shadow .15s;
+        box-shadow: 0 3px 8px rgba(248, 113, 113, 0.35);
+    }
+
+    .user-delete-btn:hover {
+        background: #fecaca;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(248, 113, 113, 0.45);
+    }
+
+    .user-delete-btn[disabled] {
+        opacity: .45;
+        cursor: default;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .admin-empty {
+        padding: 18px 0 4px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    /* Модалка */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-window {
+        background: #fff;
+        border-radius: 24px;
+        padding: 26px 28px;
+        width: 360px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+        animation: showModal .25s ease-out;
+    }
+
+    @keyframes showModal {
+        from {
+            transform: translateY(40px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-title {
+        margin: 0 0 10px;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .modal-text {
+        color: #555;
+        margin-bottom: 22px;
+        font-size: 14px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .modal-cancel {
+        padding: 8px 16px;
+        background: #e5e7eb;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .modal-delete {
+        padding: 8px 16px;
+        background: #ff6b9c;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(255,105,160,0.4);
+    }
+
+    .modal-delete:hover {
+        background: #ff407d;
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="admin-card">
+        <div class="admin-title-row">
+            <div>
+                <div class="admin-title">Пользователи</div>
+                <div class="admin-subtitle">
+                    Управление учётными записями. Здесь можно увидеть логин, e-mail и роль каждого пользователя.
+                </div>
+            </div>
+        </div>
+
+        {% if users %}
+            <table class="users-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логин</th>
+                    <th>Имя</th>
+                    <th>E-mail</th>
+                    <th>Роль</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.full_name or "—" }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            {% if u.role == "admin" %}
+                                <span class="user-role-badge user-role-admin">админ</span>
+                            {% elif u.role == "master" %}
+                                <span class="user-role-badge user-role-master">мастер</span>
+                            {% else %}
+                                <span class="user-role-badge user-role-user">пользователь</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set is_self = (u.id == session.get('user_id')) %}
+                            {% if u.role == "admin" or is_self %}
+                                <button class="user-delete-btn" disabled>
+                                    Нельзя удалить
+                                </button>
+                            {% else %}
+                                <button type="button"
+                                        class="user-delete-btn js-delete-user"
+                                        data-username="{{ u.username }}"
+                                        data-action="{{ url_for('admin_delete_user', user_id=u.id) }}">
+                                    Удалить
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="admin-empty">
+                Пока нет пользователей.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-window">
+        <h3 class="modal-title">Удалить пользователя?</h3>
+        <p class="modal-text">
+            Вы уверены, что хотите удалить пользователя <span id="modalUserName"></span>?<br>
+            Все связанные данные будут удалены.
+        </p>
+
+        <form id="modalDeleteForm" method="post">
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel" id="closeModal">Отмена</button>
+                <button type="submit" class="modal-delete">Удалить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("deleteModal");
+    const modalName = document.getElementById("modalUserName");
+    const modalForm = document.getElementById("modalDeleteForm");
+    const closeModal = document.getElementById("closeModal");
+
+    document.querySelectorAll(".js-delete-user").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const userName = btn.dataset.username;
+            const actionUrl = btn.dataset.action;
+
+            modalName.textContent = userName;
+            modalForm.action = actionUrl;
+
+            modal.style.display = "flex";
+        });
+    });
+
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+    });
+});
+</script>
+{% endblock %}

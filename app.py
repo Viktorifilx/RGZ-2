@@ -14,6 +14,19 @@ app = Flask(__name__)
 # ключ сессии
 app.secret_key = "super_secret_key_change_me"
 
+# === загрузка аватаров ===
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads", "avatars")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 # путь к БД
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database", "fair.db")
@@ -88,10 +101,14 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), nullable=False)
+    username = db.Column(db.String(120), nullable=False)  # логин
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)  # тут хеш
-    role = db.Column(db.String(20), nullable=False, default="user")  # user/master/admin
+    password = db.Column(db.String(200), nullable=False)  # хеш пароля
+    role = db.Column(db.String(20), nullable=False, default="user")
+
+    # НОВОЕ: имя и файл аватарки
+    full_name = db.Column(db.String(120), nullable=True)  # настоящее имя
+    avatar_filename = db.Column(db.String(255), nullable=True)  # имя файла в /static/uploads/avatars
 
 
 class StreetRequest(db.Model):
@@ -329,6 +346,12 @@ def recalc_admin_counters():
 def auto_update_unread():
     """Обновление счётчиков перед каждым запросом."""
     if "user_id" in session:
+        # 🔄 каждый запрос подтягиваем актуальные данные пользователя из БД
+        user = User.query.get(session["user_id"])
+        if user:
+            session["avatar_filename"] = user.avatar_filename
+            session["full_name"] = user.full_name
+
         recalc_unread_total()
         recalc_support_badge()
         recalc_admin_counters()
@@ -339,8 +362,10 @@ def auto_update_unread():
         session["admin_requests"] = 0
 
 
+
 def login_required(view_func):
     """Защита входом."""
+
     @wraps(view_func)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
@@ -353,6 +378,7 @@ def login_required(view_func):
 
 def admin_required(view_func):
     """Только админ."""
+
     @wraps(view_func)
     def wrapped(*args, **kwargs):
         if session.get("user_role") != "admin":
@@ -481,11 +507,17 @@ def register():
     errors = []
 
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
+        username = request.form.get("username", "").strip()  # логин
+        full_name = request.form.get("full_name", "").strip()  # имя
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         role = request.form.get("role", "user")
 
+        # файл аватарки
+        avatar_file = request.files.get("avatar")
+        avatar_filename = None
+
+        # простая валидация
         if not username:
             errors.append("Введите логин.")
         if not email:
@@ -494,23 +526,39 @@ def register():
             errors.append("Введите пароль.")
         if User.query.filter_by(email=email).first():
             errors.append("Пользователь с таким e-mail уже существует.")
+        if User.query.filter_by(username=username).first():
+            errors.append("Пользователь с таким логином уже существует.")
+
+        # если всё ок, сохраняем аватар
+        if not errors and avatar_file and avatar_file.filename:
+            if allowed_file(avatar_file.filename):
+                from werkzeug.utils import secure_filename
+                from time import time
+
+                safe_name = secure_filename(avatar_file.filename)
+                ext = safe_name.rsplit(".", 1)[1].lower()
+                avatar_filename = f"{int(time())}_{username}.{ext}"
+                avatar_path = os.path.join(app.config["UPLOAD_FOLDER"], avatar_filename)
+                avatar_file.save(avatar_path)
+            else:
+                errors.append(
+                    "Аватарку нужно загрузить в формате: png, jpg, jpeg, gif, webp."
+                )
 
         if not errors:
             user = User(
                 username=username,
+                full_name=full_name or None,
                 email=email,
                 password=generate_password_hash(password),
                 role=role,
+                avatar_filename=avatar_filename,
             )
             db.session.add(user)
             db.session.commit()
 
-            flash("Аккаунт создан. Можно войти.", "success")
+            flash("Аккаунт успешно создан. Теперь можно войти.", "success")
             return redirect(url_for("login"))
-
-            if not username.isascii():
-                errors.append("Логин должен быть только латиницей.")
-
 
     return render_template("register.html", errors=errors)
 
@@ -543,6 +591,8 @@ def login():
                 session["user_id"] = user.id
                 session["username"] = user.username
                 session["user_role"] = user.role
+                session["avatar_filename"] = user.avatar_filename
+                session["full_name"] = user.full_name
 
                 recalc_unread_total()
                 recalc_support_badge()
@@ -555,6 +605,7 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
 
 @app.route("/account/delete", methods=["GET", "POST"])
 @login_required
@@ -569,21 +620,22 @@ def delete_account():
         ).delete(synchronize_session=False)
 
         # 2. обращения в поддержку
-        SupportMessage.query.filter_by(user_id=user_id).delete(synchronize_session=False)
-
-        # 3. заявки пользователя
-        StreetRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
-        AdRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
-        PavilionRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
-
-        # 4. объявления, где он мастер – оставляем, но отвязываем
-        Ad.query.filter_by(master_id=user_id).update(
-            {
-                "master_id": None,
-                "author_name": user.username
-            },
+        SupportMessage.query.filter_by(user_id=user_id).delete(
             synchronize_session=False
         )
+
+        # 3. заявки пользователя
+        StreetRequest.query.filter_by(user_id=user_id).delete(
+            synchronize_session=False
+        )
+        AdRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        PavilionRequest.query.filter_by(user_id=user_id).delete(
+            synchronize_session=False
+        )
+
+        # 4. если это мастер – удаляем все его объявления
+        if user.role == "master":
+            Ad.query.filter_by(master_id=user_id).delete(synchronize_session=False)
 
         # 5. сам пользователь
         db.session.delete(user)
@@ -595,7 +647,6 @@ def delete_account():
 
     fio, group = get_student_info()
     return render_template("account_delete.html", fio=fio, group=group)
-
 
 
 # ===== ПРОСТЫЕ СТРАНИЦЫ =====
@@ -880,6 +931,71 @@ def admin_support_reply(msg_id):
     return redirect(url_for("admin_support"))
 
 
+# ===== АДМИН: ПОЛЬЗОВАТЕЛИ =====
+
+
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    """Список всех пользователей для администратора."""
+    fio, group = get_student_info()
+    users = User.query.order_by(User.id).all()
+    return render_template(
+        "admin_users.html",
+        fio=fio,
+        group=group,
+        users=users,
+    )
+
+
+@app.route("/admin/users/<int:user_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_user(user_id):
+    """Удаление учётной записи пользователем-админом."""
+
+    # нельзя удалить себя
+    if user_id == session.get("user_id"):
+        flash("Нельзя удалить собственный админ-аккаунт.", "error")
+        return redirect(url_for("admin_users"))
+
+    user = User.query.get_or_404(user_id)
+
+    # подстрахуемся: не удаляем других админов
+    if user.role == "admin":
+        flash("Нельзя удалить администраторский аккаунт.", "error")
+        return redirect(url_for("admin_users"))
+
+    # 1. сообщения по объявлениям
+    AdMessage.query.filter(
+        (AdMessage.sender_id == user_id) | (AdMessage.receiver_id == user_id)
+    ).delete(synchronize_session=False)
+
+    # 2. обращения в поддержку
+    SupportMessage.query.filter_by(user_id=user_id).delete(
+        synchronize_session=False
+    )
+
+    # 3. заявки
+    StreetRequest.query.filter_by(user_id=user_id).delete(
+        synchronize_session=False
+    )
+    AdRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    PavilionRequest.query.filter_by(user_id=user_id).delete(
+        synchronize_session=False
+    )
+
+    # 4. если это мастер – удаляем все его объявления
+    if user.role == "master":
+        Ad.query.filter_by(master_id=user_id).delete(synchronize_session=False)
+
+    # 5. сам пользователь
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("Учётная запись удалена.", "success")
+    return redirect(url_for("admin_users"))
+
+
 # ===== АДМИН: ПАВИЛЬОНЫ И ОБЪЯВЛЕНИЯ =====
 
 
@@ -922,90 +1038,117 @@ def admin_delete_ad(ad_id):
     return redirect(url_for("pavilion_page", pavilion_id=pavilion_id))
 
 
+@app.route("/admin/ad/<int:ad_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_edit_ad(ad_id):
+    """Редактирование текста объявления администратором."""
+    ad = Ad.query.get_or_404(ad_id)
+
+    fio, group = get_student_info()
+    errors = []
+    title_val = ad.title
+    text_val = ad.text
+
+    if request.method == "POST":
+        title_val = request.form.get("title", "").strip()
+        text_val = request.form.get("text", "").strip()
+
+        if not title_val:
+            errors.append("Введите заголовок объявления.")
+        if not text_val:
+            errors.append("Введите текст объявления.")
+
+        if not errors:
+            ad.title = title_val
+            ad.text = text_val
+            db.session.commit()
+            flash("Объявление сохранено.", "success")
+            return redirect(url_for("pavilion_page", pavilion_id=ad.pavilion_id))
+
+    form = {"title": title_val, "text": text_val}
+    return render_template(
+        "admin_edit_ad.html",
+        ad=ad,
+        form=form,
+        errors=errors,
+        fio=fio,
+        group=group,
+    )
+
+
 @app.route("/admin/delete-ad/<int:ad_id>", methods=["POST"])
 @admin_required
 def admin_delete_ad_legacy(ad_id):
     return admin_delete_ad(ad_id)
 
 
-# ===== АДМИН: ЗАЯВКИ НА ОБЪЯВЛЕНИЯ И ПАВИЛЬОНЫ =====
+# ===== ОБЪЯВЛЕНИЯ: МАСТЕР УДАЛЯЕТ/РЕДАКТИРУЕТ СВОИ =====
 
 
-@app.route("/admin/ad-requests")
-@admin_required
-def admin_ad_requests():
-    fio, group = get_student_info()
+@app.route("/my/ad/<int:ad_id>/delete", methods=["POST"])
+@login_required
+def delete_own_ad(ad_id):
+    """Удаление объявления самим мастером."""
+    ad = Ad.query.get_or_404(ad_id)
+    user_id = session.get("user_id")
+    role = session.get("user_role")
 
-    ad_requests = AdRequest.query.order_by(AdRequest.created_at.desc()).all()
-    pav_requests = PavilionRequest.query.order_by(
-        PavilionRequest.created_at.desc()
-    ).all()
+    # Разрешаем только мастеру и только своё объявление
+    if role != "master" or ad.master_id != user_id:
+        flash("Вы можете удалять только свои объявления.", "error")
+        return redirect(url_for("ad_page", ad_id=ad.id))
 
-    stats_ads = {
-        "total": len(ad_requests),
-        "pending": sum(1 for r in ad_requests if r.status == "pending"),
-        "approved": sum(1 for r in ad_requests if r.status == "approved"),
-        "rejected": sum(1 for r in ad_requests if r.status == "rejected"),
-    }
+    pavilion_id = ad.pavilion_id
 
-    stats_pav = {
-        "total": len(pav_requests),
-        "pending": sum(1 for r in pav_requests if r.status == "pending"),
-        "approved": sum(1 for r in pav_requests if r.status == "approved"),
-        "rejected": sum(1 for r in pav_requests if r.status == "rejected"),
-    }
-
-    return render_template(
-        "admin_ad_requests.html",
-        fio=fio,
-        group=group,
-        ad_requests=ad_requests,
-        pav_requests=pav_requests,
-        stats_ads=stats_ads,
-        stats_pav=stats_pav,
-    )
-
-
-@app.route("/admin/ad-requests/<int:req_id>/approve", methods=["POST"])
-@admin_required
-def admin_approve_ad_request(req_id):
-    req = AdRequest.query.get_or_404(req_id)
-
-    if req.status != "pending":
-        flash("Эта заявка уже обработана.", "error")
-        return redirect(url_for("admin_ad_requests"))
-
-    ad = Ad(
-        title=req.title,
-        text=req.text,
-        author_name=req.user.username,
-        pavilion_id=req.pavilion_id,
-        master_id=req.user_id,
-    )
-    db.session.add(ad)
-
-    req.status = "approved"
+    db.session.delete(ad)
     db.session.commit()
 
-    recalc_admin_counters()
-    flash("Объявление опубликовано.", "success")
-    return redirect(url_for("pavilion_page", pavilion_id=req.pavilion_id))
+    flash("Объявление удалено.", "success")
+    return redirect(url_for("pavilion_page", pavilion_id=pavilion_id))
 
 
-@app.route("/admin/ad-requests/<int:req_id>/reject", methods=["POST"])
-@admin_required
-def admin_reject_ad_request(req_id):
-    req = AdRequest.query.get_or_404(req_id)
+@app.route("/my/ad/<int:ad_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_own_ad(ad_id):
+    """Редактирование объявления самим мастером."""
+    ad = Ad.query.get_or_404(ad_id)
+    user_id = session.get("user_id")
+    role = session.get("user_role")
 
-    if req.status != "pending":
-        flash("Эта заявка уже обработана.", "error")
-    else:
-        req.status = "rejected"
-        db.session.commit()
-        recalc_admin_counters()
-        flash("Заявка на объявление отклонена.", "info")
+    # разрешаем только мастеру-автору
+    if role != "master" or ad.master_id != user_id:
+        flash("Вы можете редактировать только свои объявления.", "error")
+        return redirect(url_for("ad_page", ad_id=ad.id))
 
-    return redirect(url_for("admin_ad_requests"))
+    errors = []
+    form = {"title": ad.title, "text": ad.text}
+
+    if request.method == "POST":
+        form["title"] = request.form.get("title", "").strip()
+        form["text"] = request.form.get("text", "").strip()
+
+        if not form["title"]:
+            errors.append("Введите заголовок объявления.")
+        if not form["text"]:
+            errors.append("Опишите, чем вы можете помочь.")
+
+        if not errors:
+            ad.title = form["title"]
+            ad.text = form["text"]
+            db.session.commit()
+
+            flash("Объявление обновлено.", "success")
+            return redirect(url_for("ad_page", ad_id=ad.id))
+
+    fio, group = get_student_info()
+    return render_template(
+        "edit_ad.html",
+        ad=ad,
+        form=form,
+        errors=errors,
+        fio=fio,
+        group=group,
+    )
 
 
 # ===== СООБЩЕНИЯ МАСТЕРА ПО ОБЪЯВЛЕНИЯМ =====
@@ -1450,6 +1593,86 @@ def admin_reject_pavilion_request(req_id):
         db.session.commit()
         recalc_admin_counters()
         flash("Заявка на павильон отклонена.", "info")
+
+    return redirect(url_for("admin_ad_requests"))
+
+
+# ===== АДМИН: ЗАЯВКИ НА ОБЪЯВЛЕНИЯ И ПАВИЛЬОНЫ =====
+
+
+@app.route("/admin/ad-requests")
+@admin_required
+def admin_ad_requests():
+    fio, group = get_student_info()
+
+    ad_requests = AdRequest.query.order_by(AdRequest.created_at.desc()).all()
+    pav_requests = PavilionRequest.query.order_by(
+        PavilionRequest.created_at.desc()
+    ).all()
+
+    stats_ads = {
+        "total": len(ad_requests),
+        "pending": sum(1 for r in ad_requests if r.status == "pending"),
+        "approved": sum(1 for r in ad_requests if r.status == "approved"),
+        "rejected": sum(1 for r in ad_requests if r.status == "rejected"),
+    }
+
+    stats_pav = {
+        "total": len(pav_requests),
+        "pending": sum(1 for r in pav_requests if r.status == "pending"),
+        "approved": sum(1 for r in pav_requests if r.status == "approved"),
+        "rejected": sum(1 for r in pav_requests if r.status == "rejected"),
+    }
+
+    return render_template(
+        "admin_ad_requests.html",
+        fio=fio,
+        group=group,
+        ad_requests=ad_requests,
+        pav_requests=pav_requests,
+        stats_ads=stats_ads,
+        stats_pav=stats_pav,
+    )
+
+
+@app.route("/admin/ad-requests/<int:req_id>/approve", methods=["POST"])
+@admin_required
+def admin_approve_ad_request(req_id):
+    req = AdRequest.query.get_or_404(req_id)
+
+    if req.status != "pending":
+        flash("Эта заявка уже обработана.", "error")
+        return redirect(url_for("admin_ad_requests"))
+
+    ad = Ad(
+        title=req.title,
+        text=req.text,
+        author_name=req.user.username,
+        pavilion_id=req.pavilion_id,
+        master_id=req.user_id,
+    )
+    db.session.add(ad)
+
+    req.status = "approved"
+    db.session.commit()
+
+    recalc_admin_counters()
+    flash("Объявление опубликовано.", "success")
+    return redirect(url_for("pavilion_page", pavilion_id=req.pavilion_id))
+
+
+@app.route("/admin/ad-requests/<int:req_id>/reject", methods=["POST"])
+@admin_required
+def admin_reject_ad_request(req_id):
+    req = AdRequest.query.get_or_404(req_id)
+
+    if req.status != "pending":
+        flash("Эта заявка уже обработана.", "error")
+    else:
+        req.status = "rejected"
+        db.session.commit()
+        recalc_admin_counters()
+        flash("Заявка на объявление отклонена.", "info")
 
     return redirect(url_for("admin_ad_requests"))
 

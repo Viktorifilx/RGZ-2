@@ -1749,3 +1749,38 @@ body {
     text-decoration: underline;
 }
 
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;           /* чтобы фото не искажалось */
+    flex-shrink: 0;
+}
+
+
+.user-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 999px;
+}
+
+.user-chip {
+    display: inline-flex;
+    align-items: center;         /* выравнивание по центру */
+    gap: 8px;                     /* расстояние между аватаром и текстом */
+    background: rgba(0,0,0,0.03);
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+
+.user-name {
+    display: flex;
+    align-items: center;         /* выравнивание внутри текста */
+    gap: 4px;
+    font-weight: 600;
+}
+
+
+

@@ -216,6 +216,36 @@
         text-decoration: underline;
     }
 
+    /* --- аватар --- */
+
+    .avatar-field {
+        margin-top: 4px;
+        padding: 10px 12px;
+        border-radius: 16px;
+        background: #faf5ff;
+        border: 1px dashed rgba(148,163,184,0.7);
+        font-size: 12px;
+    }
+
+    .avatar-label {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .avatar-input {
+        display: block;
+        width: 100%;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .avatar-hint {
+        color: #6b7280;
+        font-size: 11px;
+    }
+
     /* --- правая колонка с «историей» --- */
 
     .auth-story {
@@ -284,12 +314,16 @@
         </div>
         <h1 class="auth-title">Стань частью цифровой ярмарки</h1>
         <p class="auth-subtitle">
-            Создай аккаунт, выбери свою роль и находи людей, с которыми удобно учиться, кодить и творить.
+            Создай аккаунт, выбери свою роль и добавь аватарку, чтобы мастера и ученики узнавали тебя с первого взгляда.
         </p>
 
         <div class="auth-layout">
             <div>
-                <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+                <form method="POST"
+                      action="{{ url_for('register') }}"
+                      enctype="multipart/form-data"
+                      class="auth-form">
+
                     <div class="role-select" id="role-select">
                         <label class="role-option">
                             <input type="radio" name="role" value="master" checked>
@@ -320,9 +354,44 @@
                         </label>
                     </div>
 
-                    <input class="auth-input" type="text" name="username" placeholder="Никнейм (логин)" required>
-                    <input class="auth-input" type="email" name="email" placeholder="Email" required>
-                    <input class="auth-input" type="password" name="password" placeholder="Пароль" required>
+                    <input class="auth-input"
+                           type="text"
+                           name="username"
+                           placeholder="Никнейм (логин)"
+                           required>
+
+                    <input class="auth-input"
+                           type="text"
+                           name="full_name"
+                           placeholder="Имя и фамилия (для профиля)"
+                           required>
+
+                    <input class="auth-input"
+                           type="email"
+                           name="email"
+                           placeholder="Email"
+                           required>
+
+                    <input class="auth-input"
+                           type="password"
+                           name="password"
+                           placeholder="Пароль"
+                           required>
+
+                    <div class="avatar-field">
+                        <label class="avatar-label" for="avatar-input">
+                            Аватарка профиля
+                        </label>
+                        <input class="avatar-input"
+                               id="avatar-input"
+                               type="file"
+                               name="avatar"
+                               accept="image/*">
+                        <div class="avatar-hint">
+                            Поддерживаются форматы PNG, JPG, JPEG, GIF, WEBP. Если файл не выбрать,
+                            будет использован стандартный кружок с инициалом.
+                        </div>
+                    </div>
 
                     <button type="submit" class="btn btn-primary auth-btn">
                         Создать аккаунт
@@ -346,7 +415,7 @@
                 </p>
                 <p class="auth-role-hint" id="auth-role-hint">
                     Сейчас выбран режим <b>«Я мастер»</b> — после регистрации ты сможешь
-                    размещать объявления в павильонах.
+                    размещать объявления в павильонах и отвечать на сообщения.
                 </p>
             </div>
         </div>

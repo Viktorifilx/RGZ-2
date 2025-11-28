@@ -1,188 +1,203 @@
 {% extends "base.html" %}
 
-{% block title %}Сообщения по объявлению — {{ ad.title }}{% endblock %}
+{% block title %}{{ ad.title }} — объявление{% endblock %}
 
 {% block content %}
+
 <style>
-    .chat-wrapper {
+    .ad-page-wrapper {
         min-height: calc(100vh - 140px);
         padding: 30px 20px 60px;
-        background:
-            radial-gradient(circle at 0 0, #ffe8ff 0, transparent 55%),
-            radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
         display: flex;
         justify-content: center;
         align-items: flex-start;
+        background:
+            radial-gradient(circle at 0 0, #ffe8ff 0, transparent 55%),
+            radial-gradient(circle at 100% 100%, #e0f3ff 0, transparent 55%);
     }
 
-    .chat-card {
+    .ad-page-card {
+        max-width: 840px;
         width: 100%;
-        max-width: 760px;
         background: #ffffff;
         border-radius: 26px;
-        padding: 22px 22px 18px;
-        box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+        padding: 24px 26px 22px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
     }
 
-    .chat-header {
+    .ad-page-back {
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: #6b7280;
+        text-decoration: none;
+        transition: .18s;
+    }
+
+    .ad-page-back:hover {
+        color: #111827;
+        transform: translateX(-3px);
+    }
+
+    .ad-page-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .ad-page-sub {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #6b7280;
         margin-bottom: 14px;
     }
 
-    .chat-title {
-        font-size: 20px;
-        font-weight: 800;
-        margin: 4px 0 2px;
+    .ad-master-label {
+        font-weight: 600;
+        color: #111827;
     }
 
-    .chat-subtitle {
-        font-size: 13px;
-        color: #6b7280;
+    .ad-master-name {
+        font-weight: 600;
     }
 
-    .chat-badge {
-        display: inline-flex;
-        align-items: center;
+    .ad-master-email {
+        color: #ff4fd8;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .ad-master-email:hover {
+        text-decoration: underline;
+    }
+
+    .ad-page-chip {
         padding: 2px 8px;
         border-radius: 999px;
         font-size: 11px;
-        background: rgba(248,250,252,0.9);
-        margin-left: 6px;
+        background: rgba(248, 250, 252, 0.9);
     }
 
-    .chat-box {
-        margin-top: 10px;
-        border-radius: 18px;
-        background: linear-gradient(180deg,#f9fafb,#eef2ff);
-        padding: 12px 10px;
-        max-height: 360px;
-        overflow-y: auto;
-    }
-
-    .chat-empty {
-        font-size: 13px;
-        color: #6b7280;
-        padding: 16px 10px;
-    }
-
-    .chat-message {
-        max-width: 80%;
-        padding: 8px 10px;
-        margin-bottom: 8px;
-        border-radius: 14px;
-        font-size: 13px;
-        line-height: 1.4;
-        background: #ffffff;
-        box-shadow: 0 4px 10px rgba(15,23,42,0.06);
-    }
-
-    .chat-message.me {
-        margin-left: auto;
-        background: linear-gradient(135deg,#ff4fd8,#ff9a3c);
-        color: #ffffff;
-    }
-
-    .chat-message-author {
-        font-weight: 600;
-        font-size: 12px;
-        margin-bottom: 2px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .chat-message-time {
-        font-size: 11px;
-        opacity: .8;
-        margin-top: 2px;
-    }
-
-    .chat-form {
-        margin-top: 12px;
-        display: flex;
-        gap: 8px;
-        align-items: flex-end;
-    }
-
-    .chat-textarea {
-        flex: 1;
-        resize: vertical;
-        min-height: 70px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        padding: 9px 11px;
+    .ad-page-text {
         font-size: 14px;
-        outline: none;
-        transition: border-color .2s, box-shadow .2s;
+        line-height: 1.6;
+        color: #111827;
+        margin-bottom: 18px;
+        white-space: pre-line;
     }
 
-    .chat-textarea:focus {
-        border-color: #ff4fd8;
-        box-shadow: 0 0 0 2px rgba(255,79,216,0.16);
+    .ad-page-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 6px;
     }
 
-    .chat-send-btn {
-        white-space: nowrap;
+    .ad-delete-own-form {
+        margin: 0;
+    }
+
+    .ad-delete-own-btn {
+        margin-top: 4px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid #ef4444;
+        background: #fee2e2;
+        color: #b91c1c;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(248, 113, 113, 0.35);
+        transition: background .2s, transform .15s, box-shadow .2s, color .2s;
+    }
+
+    .ad-delete-own-btn:hover {
+        background: #fecaca;
+        color: #7f1d1d;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(248, 113, 113, 0.45);
+    }
+
+    .ad-meta {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #9ca3af;
     }
 </style>
 
-<div class="chat-wrapper">
-    <div class="chat-card">
-        <div class="chat-header">
-            <a href="javascript:history.back()" class="auth-back" style="margin:0 0 6px 0;">
-                ← Вернуться к объявлению
-            </a>
+<div class="ad-page-wrapper">
+    <div class="ad-page-card">
 
-            <div class="chat-title">{{ ad.title }}</div>
-            <div class="chat-subtitle">
-                Мастер: {{ ad.master_display_name }}
-                <span class="chat-badge">чат по объявлению</span>
-            </div>
+        <a href="javascript:history.back()" class="ad-page-back">← Назад</a>
+
+        <h1 class="ad-page-title">{{ ad.title }}</h1>
+
+        <div class="ad-page-sub">
+            <span class="ad-master-label">Мастер:</span>
+            <span class="ad-master-name">{{ ad.master_display_name }}</span>
+
+            {# email мастера виден только авторизованным пользователям #}
+            {% if session.get('user_id') and ad.master and ad.master.email %}
+                <span>•</span>
+                <span>email:</span>
+                <a href="mailto:{{ ad.master.email }}" class="ad-master-email">
+                    {{ ad.master.email }}
+                </a>
+            {% endif %}
+
+            <span class="ad-page-chip">
+                Чат по объявлению доступен после входа
+            </span>
         </div>
 
-        <div class="chat-box">
-            {% if messages and messages|length %}
-                {% for m in messages %}
-                    {% set is_mine = (m.sender_id == current_user_id) %}
-                    <div class="chat-message {% if is_mine %}me{% endif %}">
-                        <div class="chat-message-author">
-                            {% if is_mine %}
-                                Вы
-                            {% else %}
-                                {{ users_map.get(m.sender_id, 'Пользователь') }}
-                            {% endif %}
-                            {% if m.sender_id == master_id %}
-                                <span class="chat-badge">мастер</span>
-                            {% endif %}
-                        </div>
-                        <div class="chat-message-text">
-                            {{ m.text }}
-                        </div>
-                        {% if m.created_at %}
-                            <div class="chat-message-time">
-                                {{ m.created_at }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+        <div class="ad-page-text">
+            {{ ad.text }}
+        </div>
+
+        <div class="ad-page-actions">
+            {# 1. Кнопка чата — только если пользователь вошёл
+               и ЭТО НЕ его собственное объявление #}
+            {% if session.get('user_id') %}
+                {% if session.get('user_id') != ad.master_id %}
+                    <a href="{{ url_for('ad_chat', ad_id=ad.id) }}"
+                       class="btn btn-primary">
+                        Написать мастеру
+                    </a>
+                {% endif %}
             {% else %}
-                <div class="chat-empty">
-                    Пока сообщений нет. Напиши мастеру первым — расскажи, с чем нужна помощь
-                    и когда тебе удобно работать с заданием.
-                </div>
+                {# гость: предлагаем войти, чтобы написать мастеру #}
+                <a href="{{ url_for('login') }}" class="btn btn-primary">
+                    Войти, чтобы написать мастеру
+                </a>
+            {% endif %}
+
+            {# 2. Мастер может редактировать и удалять ТОЛЬКО своё объявление #}
+            {% if session.get('user_role') == 'master'
+                  and session.get('user_id') == ad.master_id %}
+                <a href="{{ url_for('edit_own_ad', ad_id=ad.id) }}"
+                   class="btn btn-outline">
+                    Редактировать объявление
+                </a>
+
+                <form method="post"
+                      action="{{ url_for('delete_own_ad', ad_id=ad.id) }}"
+                      class="ad-delete-own-form"
+                      onsubmit="return confirm('Точно удалить это объявление? Это действие нельзя отменить.');">
+                    <button type="submit" class="ad-delete-own-btn">
+                        Удалить объявление
+                    </button>
+                </form>
             {% endif %}
         </div>
 
-        <form method="post"
-              action="{{ url_for('ad_chat', ad_id=ad.id) }}"
-              class="chat-form">
-            <textarea name="message"
-                      class="chat-textarea"
-                      placeholder="Написать сообщение мастеру..."
-                      required></textarea>
-            <button type="submit" class="btn btn-primary chat-send-btn">
-                Отправить
-            </button>
-        </form>
+        <div class="ad-meta">
+            Павильон: {{ ad.pavilion.title }} · Улица: {{ ad.pavilion.street.name }}
+        </div>
     </div>
 </div>
+
 {% endblock %}

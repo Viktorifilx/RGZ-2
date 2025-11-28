@@ -89,6 +89,9 @@
                                 <h3 class="pavilion-ad-title">{{ ad.title }}</h3>
                                 <div class="pavilion-ad-author">
                                     Мастер: {{ ad.master_display_name }}
+                                    {% if session.get('user_id') and ad.master and ad.master.email %}
+                                        · <span class="pavilion-ad-email">{{ ad.master.email }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -104,7 +107,12 @@
                 </a>
 
                 {% if session.get('user_role') == 'admin' %}
-                <div class="ad-admin-delete-form">
+                <div class="ad-admin-actions">
+                    <a href="{{ url_for('admin_edit_ad', ad_id=ad.id) }}"
+                       class="ad-edit-btn">
+                        Редактировать
+                    </a>
+
                     <button type="button"
                             class="ad-delete-btn js-open-delete-modal"
                             data-ad-id="{{ ad.id }}">
@@ -112,7 +120,7 @@
                     </button>
                 </div>
                 {% endif %}
-            </div>
+            </div>  {# конец одной карточки объявления #}
             {% endfor %}
         </div>
     {% else %}
@@ -128,13 +136,13 @@
         margin: 12px 0 18px;
         padding: 8px 10px;
         border-radius: 14px;
-        background: rgba(255,255,255,0.9);
+        background: rgba(255, 255, 255, 0.9);
         display: inline-flex;
         flex-wrap: wrap;
         gap: 8px;
         align-items: center;
         font-size: 13px;
-        box-shadow: 0 8px 18px rgba(15,23,42,0.08);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
     }
 
     .admin-pavilion-label {
@@ -162,11 +170,24 @@
         position: relative;
     }
 
-    .ad-admin-delete-form {
-        position: absolute;
-        right: 16px;
-        bottom: 14px;
-        text-align: right;
+    .ad-admin-actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .ad-edit-btn {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .ad-edit-btn:hover {
+        background: #eef2ff;
     }
 
     .ad-delete-btn {
@@ -196,6 +217,12 @@
         border-radius: 999px;
         padding: 8px 18px;
         font-size: 14px;
+    }
+
+    .pavilion-ad-email {
+        color: #ff4fd8;
+        font-weight: 500;
+        font-size: 13px;
     }
 </style>
 
