@@ -508,6 +508,10 @@ def register():
             flash("Аккаунт создан. Можно войти.", "success")
             return redirect(url_for("login"))
 
+            if not username.isascii():
+                errors.append("Логин должен быть только латиницей.")
+
+
     return render_template("register.html", errors=errors)
 
 
@@ -551,6 +555,47 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
+@app.route("/account/delete", methods=["GET", "POST"])
+@login_required
+def delete_account():
+    user_id = session["user_id"]
+    user = User.query.get_or_404(user_id)
+
+    if request.method == "POST":
+        # 1. удаляем все сообщения по объявлениям
+        AdMessage.query.filter(
+            (AdMessage.sender_id == user_id) | (AdMessage.receiver_id == user_id)
+        ).delete(synchronize_session=False)
+
+        # 2. обращения в поддержку
+        SupportMessage.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+
+        # 3. заявки пользователя
+        StreetRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        AdRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        PavilionRequest.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+
+        # 4. объявления, где он мастер – оставляем, но отвязываем
+        Ad.query.filter_by(master_id=user_id).update(
+            {
+                "master_id": None,
+                "author_name": user.username
+            },
+            synchronize_session=False
+        )
+
+        # 5. сам пользователь
+        db.session.delete(user)
+        db.session.commit()
+
+        session.clear()
+        flash("Аккаунт удалён.", "success")
+        return redirect(url_for("index"))
+
+    fio, group = get_student_info()
+    return render_template("account_delete.html", fio=fio, group=group)
+
 
 
 # ===== ПРОСТЫЕ СТРАНИЦЫ =====

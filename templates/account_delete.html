@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление аккаунта — FairMarket{% endblock %}
+
+{% block content %}
+<section class="settings-page">
+    <a href="{{ url_for('index') }}" class="back-link">← На главную</a>
+
+    <div class="settings-layout">
+        <div class="settings-text">
+            <div class="settings-kicker">Настройки аккаунта</div>
+            <h1 class="settings-title">Удаление аккаунта</h1>
+            <p class="settings-subtitle">
+                Аккаунт будет полностью удалён, вернуть его нельзя.
+                Объявления останутся на ярмарке, но уже без привязки к профилю.
+            </p>
+
+            <div class="danger-card">
+                <div class="danger-badge">Внимание</div>
+                <p class="danger-text">
+                    После удаления ты не сможешь войти под этим логином и восстановить данные.
+                </p>
+                <p class="danger-note">
+                    Убедись, что просмотрел(а) все чаты и сохранил(а) нужную информацию.
+                </p>
+            </div>
+
+            <form method="post" class="danger-form">
+                <button type="submit" class="btn btn-danger">
+                    Да, удалить аккаунт
+                </button>
+                <p class="danger-back">
+                    Передумал(а)?
+                    <a href="{{ url_for('index') }}">Вернуться на главную</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

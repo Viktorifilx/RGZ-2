@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 
-
     <style>
         .msg-badge {
             display: inline-block;
@@ -22,6 +21,15 @@
             margin-left: 6px;
             font-weight: 600;
             line-height: 1;
+        }
+
+        /* маленькая кнопка удаления аккаунта в шапке */
+        .delete-account-link {
+            color: #ef4444;
+            border-color: rgba(248, 113, 113, 0.5);
+        }
+        .delete-account-link:hover {
+            background: #fef2f2;
         }
     </style>
 
@@ -48,7 +56,6 @@
                 {% endif %}
             </a>
         {% endif %}
-
 
         {# Ссылка "Сообщения" для мастера и пользователя #}
         {% if session.get('user_role') == 'master' %}
@@ -85,6 +92,9 @@
             </span>
             <a href="{{ url_for('logout') }}" class="btn btn-outline">
                 Выйти
+            </a>
+            <a href="{{ url_for('delete_account') }}" class="btn btn-ghost delete-account-link">
+                Удалить аккаунт
             </a>
         {% else %}
             <a href="{{ url_for('login') }}" class="btn btn-outline">
